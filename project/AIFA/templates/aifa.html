@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>AIFA</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-icon-180x180.png">
+<link rel="icon" type="image/x-icon" href="/assets/05-moon_98595.ico">
+
+
+<style>
+
+:root{
+--bg:#000000;
+--text:#d9c8bde6;
+--accent:#b89178e6;
+}
+
+body{
+background:var(--bg);
+font-family:'Playfair Display',serif;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content: flex-end; /* Anchors the interactive layout to the bottom */
+min-height: 100vh;
+margin:0;
+padding: 20px;
+box-sizing: border-box;
+}
+
+/* 
+  Hero Container: Centered on landing.
+  Moves elegantly to the top-left corner on submit.
+*/
+.hero{
+position: absolute;
+top: 40%;
+left: 50%;
+transform: translate(-50%, -50%);
+display:flex;
+flex-direction:column;
+align-items:center;
+text-align:center;
+transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+z-index: 10;
+}
+
+/* Enlarged landing logo */
+.hero img{
+width:180px; 
+height:auto;
+object-fit: contain;
+margin-bottom:15px;
+transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+h1 {
+color: var(--accent);
+font-weight: 400;
+letter-spacing: 4px;
+margin: 0;
+font-size: 38px;
+transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Keeps the chat box and the input comfortably down at the bottom */
+.chat-container {
+width: 650px;
+max-width: 100%;
+display: flex;
+flex-direction: column;
+align-items: center;
+margin-bottom: 30px;
+z-index: 5;
+}
+
+#chat-box{
+display:none;
+width: 100%;
+max-height: 60vh;
+overflow-y: auto;
+flex-direction:column;
+gap:10px;
+margin-bottom: 20px;
+-webkit-overflow-scrolling: touch;
+-ms-overflow-style: none;  /* Hides scrollbar in IE & Edge */
+scrollbar-width: none;  /* Hides scrollbar in Firefox */
+}
+
+/* Hides scrollbar in Chrome, Safari, and Opera */
+#chat-box::-webkit-scrollbar {
+display: none;
+}
+
+/* Universal message styling */
+.message{
+margin-bottom:25px;
+line-height:1.7;
+max-width:80%;
+display:flex;
+flex-direction:column;
+color: var(--text);
+}
+
+/* User Message right alignment */
+.user-message {
+align-self: flex-end;
+text-align: right;
+}
+
+/* AIFA Message left alignment */
+.aifa-message {
+align-self: flex-start;
+text-align: left;
+}
+
+em{
+display:block;
+font-size:12px;
+letter-spacing:2px;
+text-transform:uppercase;
+color:var(--accent);
+margin-bottom:6px;
+}
+
+input{
+width:100%;
+max-width: 450px;
+padding:14px;
+font-size:16px;
+font-family:'Playfair Display',serif;
+background:transparent;
+border:1px solid #ccc;
+border-radius:5px;
+text-align:center;
+outline:none;
+color: var(--text);
+transition: all 0.3s ease;
+}
+
+input:focus {
+border-color: var(--accent);
+}
+
+/* 
+  ACTIVE STATE STYLES 
+  Triggered when user initiates conversation
+*/
+body.chat-active .hero {
+top: 30px;
+left: 30px;
+transform: translate(0, 0);
+flex-direction: row; 
+gap: 15px;
+}
+
+body.chat-active .hero img {
+width: 70px; 
+margin-bottom: 0;
+}
+
+body.chat-active h1 {
+font-size: 24px;
+letter-spacing: 2px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="hero">
+  <img src="/assets/logo.jpg" alt="AIFA Logo">
+  <h1>AIFA</h1>
+</div>
+
+<div class="chat-container">
+    <div id="chat-box"></div>
+    <input
+    id="input"
+    placeholder="Type your query..."
+    onkeypress="if(event.key==='Enter'){send()}">
+</div>
+
+<script>
+// Base API URL configuration
+// Leave as empty string "" for same-domain deployment, or set your endpoint domain
+const API_BASE_URL = window.location.origin.includes("localhost") 
+    ? "" 
+    : ""; // e.g., "https://api.yourdomain.com"
+
+function typeWriter(element, label, text, containerToScroll) {
+    element.innerHTML = `<em>${label}</em><span class="text-content"></span>`;
+    const textSpan = element.querySelector('.text-content');
+
+    return new Promise((resolve) => {
+        let i = 0;
+        const interval = setInterval(() => {
+            textSpan.textContent = text.substring(0, i);
+            i++;
+
+            if (containerToScroll) {
+                containerToScroll.scrollTop = containerToScroll.scrollHeight;
+            }
+
+            if (i > text.length) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 15);
+    });
+}
+
+async function send() {
+    const input = document.getElementById("input");
+    const chat = document.getElementById("chat-box");
+    const message = input.value.trim();
+
+    if (message === "") return;
+
+    // UI state updates
+    document.body.classList.add('chat-active');
+    chat.style.display = "flex";
+
+    // Create user message safely to avoid XSS
+    const userDiv = document.createElement("div");
+    userDiv.className = "message user-message";
+    userDiv.innerHTML = `<em>You</em><span class="text-content"></span>`;
+    userDiv.querySelector('.text-content').textContent = message;
+    chat.appendChild(userDiv);
+
+    input.value = "";
+    chat.scrollTop = chat.scrollHeight;
+
+    // AI response container placeholder
+    const aifaDiv = document.createElement("div");
+    aifaDiv.className = "message aifa-message";
+    chat.appendChild(aifaDiv);
+
+    try {
+        // Target the portfolio proxy route explicitly
+        const res = await fetch("/api/aifa/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ message: message })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.response) {
+            await typeWriter(aifaDiv, "AIFA", data.response, chat);
+        } else {
+            aifaDiv.innerHTML = `<em>Error</em> <span class="text-content"></span>`;
+            aifaDiv.querySelector('.text-content').textContent = data.error || "Something went wrong";
+        }
+    } catch (err) {
+        aifaDiv.innerHTML = `<em>Error</em> Could not connect to server.`;
+    }
+
+    chat.scrollTop = chat.scrollHeight;
+}
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUNTIME.SYS // Modular Workspace</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="../static/apple-icon-180x180.png">
+    <link rel="icon" type="image/x-icon" href="../static/05-moon_98595.ico">
+
+    <style>
+        /* Premium Dark UI Typography & Variables */
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700&family=JetBrains+Mono:wght=400;500&display=swap');
+
+        :root {
+            --bg-main: #0d0d0d;        /* Deep True Black background */
+            --bg-surface: #141414;     /* Elevated dark panels */
+            --bg-control: #1c1c1c;     /* Input fields & code blocks */
+            --text-white: #ffffff;
+            --text-muted: #7f7f7f;     /* Subtle secondary labeling */
+            --border-subtle: #222222;  /* Thin high-end borders */
+            --accent-glow: #00ff87;    /* Toxic minimal emerald focus link */
+            
+            /* Status Indicators mapped to the Dark Palette */
+            --underweight: #00e5ff;
+            --normal: #00ff87;
+            --overweight: #ffb300;
+            --obese: #ff3366;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-white);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            line-height: 1.6;
+            letter-spacing: -0.2px;
+        }
+
+        /* Navigation Header */
+        .navbar {
+            position: sticky;
+            top: 0;
+            background: rgba(13, 13, 13, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-subtle);
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            color: var(--text-white);
+            letter-spacing: 3px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            margin-left: 2rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-white);
+        }
+
+        /* Executive Hero Section */
+        .hero {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 7rem 2rem 5rem 2rem;
+        }
+
+        .subtitle {
+            font-size: 0.75rem;
+            letter-spacing: 5px;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -2px;
+            margin-bottom: 1.5rem;
+        }
+
+        .bio {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-weight: 400;
+            max-width: 650px;
+        }
+
+        /* Workspace Grid Architecture */
+        .workspace-section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .workspace-container {
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--bg-surface);
+            margin-bottom: 6rem;
+        }
+
+        .workspace-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-subtle);
+            background: #111111;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .workspace-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1.25rem 1.5rem;
+            border: none;
+            background: transparent;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-white);
+            background: #181818;
+        }
+
+        .tab-btn.active {
+            color: var(--text-white);
+            background: var(--bg-surface);
+            border-bottom: 2px solid var(--text-white);
+        }
+
+        /* Tool Viewports */
+        .tool-panel {
+            display: none;
+            padding: 3.5rem;
+            min-height: 480px;
+        }
+
+        .tool-panel.active {
+            display: block;
+        }
+
+        /* Premium Inputs & Controls */
+        input[type="text"], input[type="number"], select, textarea {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.9rem;
+            padding: 0.85rem 1.25rem;
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            outline: none;
+            background: var(--bg-control);
+            color: var(--text-white);
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+            border-color: var(--text-muted);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0.85rem 1.75rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background-color: var(--text-white);
+            color: var(--bg-main);
+            border: 1px solid var(--text-white);
+        }
+
+        .btn-primary:hover {
+            background-color: transparent;
+            color: var(--text-white);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-white);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-white);
+            background-color: var(--bg-control);
+        }
+
+        /* Code Inspection Drawer */
+        .code-accordion {
+            margin-top: 3.5rem;
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 2rem;
+        }
+
+        .code-toggle-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+        }
+
+        .code-toggle-btn:hover {
+            color: var(--text-white);
+        }
+
+        .code-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            background: #090909;
+            border-radius: 6px;
+            margin-top: 1rem;
+        }
+
+        .code-content pre {
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #bcbcbc;
+            overflow-x: auto;
+            line-height: 1.6;
+            border-left: 2px solid var(--text-white);
+        }
+
+        /* --- TOOL SPECIFIC UIs --- */
+
+        /* TRANSLATOR */
+        .trans-wrapper {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .trans-selector-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .trans-selector-row select {
+            flex: 1;
+        }
+
+        .swap-btn {
+            background: var(--bg-control);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-white);
+            width: 44px;
+            height: 44px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .swap-btn:hover {
+            border-color: var(--text-white);
+        }
+
+        .trans-textarea {
+            width: 100%;
+            min-height: 120px;
+            resize: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .trans-output-box {
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 1.5rem;
+            background: var(--bg-control);
+            min-height: 100px;
+            margin-top: 1.5rem;
+        }
+
+        .trans-output-header {
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 0.5rem;
+        }
+
+        .trans-output-text {
+            font-size: 0.95rem;
+            color: var(--text-white);
+            white-space: pre-wrap;
+        }
+
+        /* CALCULATOR */
+        .calc-wrapper {
+            max-width: 310px;
+            margin: 0 auto;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--bg-surface);
+        }
+
+        .calc-screen {
+            background: #111111;
+            padding: 1.75rem;
+            text-align: right;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .calc-formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            min-height: 1.25rem;
+        }
+
+        .calc-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 400;
+            color: var(--text-white);
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            background: var(--border-subtle);
+            gap: 1px;
+        }
+
+        .calc-btn {
+            background: var(--bg-surface);
+            border: none;
+            padding: 1.25rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.05rem;
+            color: var(--text-white);
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .calc-btn:hover {
+            background: var(--bg-control);
+        }
+
+        .calc-btn.op {
+            background: #181818;
+            color: var(--text-muted);
+        }
+
+        .calc-btn.equals {
+            background: var(--text-white);
+            color: var(--bg-main);
+            font-weight: 700;
+        }
+
+        /* TASK ENGINE */
+        .todo-wrapper {
+            max-width: 550px;
+            margin: 0 auto;
+        }
+
+        .todo-input-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .todo-input-row input {
+            flex: 1;
+        }
+
+        .todo-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.15rem;
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            background: var(--bg-control);
+        }
+
+        .todo-item-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .todo-checkbox {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--text-muted);
+            border-radius: 3px;
+            cursor: pointer;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .todo-checkbox:checked {
+            background: var(--text-white);
+            border-color: var(--text-white);
+        }
+
+        .todo-checkbox:checked::after {
+            content: "\f00c";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: var(--bg-main);
+            font-size: 9px;
+        }
+
+        .todo-text {
+            font-size: 0.9rem;
+            color: var(--text-white);
+        }
+
+        .todo-checkbox:checked + .todo-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .todo-delete-btn {
+            background: none;
+            border: none;
+            color: #444;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .todo-delete-btn:hover {
+            color: var(--obese);
+        }
+
+        /* FOCUS MODULE */
+        .pomo-wrapper {
+            max-width: 450px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .timer-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 4.5rem;
+            font-weight: 300;
+            letter-spacing: -3px;
+            margin-bottom: 0.5rem;
+        }
+
+        .timer-label {
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 3rem;
+        }
+
+        .pomo-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3.5rem;
+        }
+
+        .ambient-box {
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 2rem;
+        }
+
+        .ambient-box h4 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .ambient-grid {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .ambient-btn {
+            padding: 0.6rem 1.25rem;
+            font-size: 0.8rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-control);
+            border: 1px solid var(--border-subtle);
+            border-radius: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .ambient-btn.active {
+            background: var(--text-white);
+            color: var(--bg-main);
+            border-color: var(--text-white);
+        }
+
+        /* CONVERTER METERS & FX */
+        .conv-wrapper {
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .conv-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .conv-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .conv-row select, .conv-row input {
+            flex: 1;
+        }
+
+        .conv-arrow {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* HEALTH SCALE */
+        .bmi-wrapper {
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .bmi-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .bmi-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .bmi-input-group label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .bmi-gauge {
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 2rem;
+            background: var(--bg-control);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .bmi-gauge.active {
+            display: flex;
+        }
+
+        .bmi-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3.2rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+        }
+
+        .bmi-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 0.35rem 1.25rem;
+            border-radius: 30px;
+            color: var(--bg-main);
+            margin-bottom: 1.25rem;
+        }
+
+        .bmi-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* WEATHER */
+        .weather-wrapper {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .weather-selector {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .weather-selector select {
+            flex: 1;
+        }
+
+        .weather-card {
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 2.5rem;
+            background: var(--bg-control);
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .weather-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .weather-city {
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .weather-status {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 0.25rem;
+        }
+
+        .weather-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .weather-temp {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 4rem;
+            font-weight: 300;
+            letter-spacing: -2px;
+        }
+
+        .weather-icon {
+            font-size: 3.5rem;
+            color: var(--text-white);
+        }
+
+        .weather-details {
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 1.75rem;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .weather-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .weather-detail-item i {
+            color: var(--text-white);
+            font-size: 0.95rem;
+        }
+
+        /* Philosophy Monolith Section */
+        .about-section {
+            background-color: var(--bg-surface);
+            border-top: 1px solid var(--border-subtle);
+            padding: 6rem 2rem;
+        }
+
+        .about-container {
+            max-width: 650px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .about-container h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-container p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            margin-bottom: 2.5rem;
+            font-weight: 400;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .social-links a {
+            color: var(--text-white);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .social-links a:hover {
+            color: var(--text-muted);
+        }
+
+        /* Structural Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-subtle);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .tool-panel { padding: 2rem 1.5rem; }
+            .trans-selector-row, .conv-row, .weather-selector { flex-direction: column; align-items: stretch; }
+            .ambient-grid { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">RUNTIME.SYS</a>
+            <div class="nav-links">
+                <a href="#workspace">Workspace</a>
+                <a href="#about">Philosophy</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <p class="subtitle">System Environment</p>
+            <h1>Continuous improvement through focus.</h1>
+            <p class="bio">A darkened environment structured to balance high contrast analytics with programmatic accuracy. Process calculations locally, then view the accompanying underlying clean Python logic sheets.</p>
+        </div>
+    </header>
+
+    <section id="workspace" class="workspace-section">
+        <div class="workspace-container">
+            <!-- Order: 1. Climate, 2. Translate, 3. FX Rate, 4. Tasks, 5. Focus, 6. Calc, 7. Index, 8. Matrix -->
+            <div class="workspace-tabs">
+                <button class="tab-btn active" onclick="switchTool('weather-tool', this)"><i class="fa-solid fa-cloud-sun-rain"></i> Climate</button>
+                <button class="tab-btn" onclick="switchTool('translator-tool', this)"><i class="fa-solid fa-language"></i> Translate</button>
+                <button class="tab-btn" onclick="switchTool('currency-tool', this)"><i class="fa-solid fa-coins"></i> FX Rate</button>
+                <button class="tab-btn" onclick="switchTool('todo-tool', this)"><i class="fa-solid fa-list-check"></i> Tasks</button>
+                <button class="tab-btn" onclick="switchTool('pomodoro-tool', this)"><i class="fa-solid fa-clock"></i> Focus</button>
+                <button class="tab-btn" onclick="switchTool('calculator-tool', this)"><i class="fa-solid fa-calculator"></i> Calc</button>
+                <button class="tab-btn" onclick="switchTool('bmi-tool', this)"><i class="fa-solid fa-weight-scale"></i> Index</button>
+                <button class="tab-btn" onclick="switchTool('converter-tool', this)"><i class="fa-solid fa-arrows-spin"></i> Matrix</button>
+            </div>
+
+            <!-- 1. CLIMATE SYSTEM (Default Active View: Berlin) -->
+            <div id="weather-tool" class="tool-panel active">
+                <div class="weather-wrapper">
+                    <div class="weather-selector">
+                        <select id="weather-city-select" onchange="updateWeather()">
+                            <option value="Berlin" selected>Berlin, Germany</option>
+                            <option value="Amsterdam">Amsterdam, Netherlands</option>
+                            <option value="Athens">Athens, Greece</option>
+                            <option value="Auckland">Auckland, New Zealand</option>
+                            <option value="Bangkok">Bangkok, Thailand</option>
+                            <option value="Barcelona">Barcelona, Spain</option>
+                            <option value="Beijing">Beijing, China</option>
+                            <option value="Belo Horizonte">Belo Horizonte, Brazil</option>
+                            <option value="Brussels">Brussels, Belgium</option>
+                            <option value="Buenos Aires">Buenos Aires, Argentina</option>
+                            <option value="Cairo">Cairo, Egypt</option>
+                            <option value="Cape Town">Cape Town, South Africa</option>
+                            <option value="Chicago">Chicago, USA</option>
+                            <option value="Copenhagen">Copenhagen, Denmark</option>
+                            <option value="Delhi">Delhi, India</option>
+                            <option value="Dubai">Dubai, UAE</option>
+                            <option value="Dublin">Dublin, Ireland</option>
+                            <option value="Frankfurt">Frankfurt, Germany</option>
+                            <option value="Geneva">Geneva, Switzerland</option>
+                            <option value="Helsinki">Helsinki, Finland</option>
+                            <option value="Hong Kong">Hong Kong, SAR</option>
+                            <option value="Istanbul">Istanbul, Turkey</option>
+                            <option value="Jakarta">Jakarta, Indonesia</option>
+                            <option value="Johannesburg">Johannesburg, South Africa</option>
+                            <option value="Karachi">Karachi, Pakistan</option>
+                            <option value="Kuala Lumpur">Kuala Lumpur, Malaysia</option>
+                            <option value="Lisbon">Lisbon, Portugal</option>
+                            <option value="London">London, UK</option>
+                            <option value="Los Angeles">Los Angeles, USA</option>
+                            <option value="Madrid">Madrid, Spain</option>
+                            <option value="Melbourne">Melbourne, Australia</option>
+                            <option value="Mexico City">Mexico City, Mexico</option>
+                            <option value="Milan">Milan, Italy</option>
+                            <option value="Montreal">Montreal, Canada</option>
+                            <option value="Moscow">Moscow, Russia</option>
+                            <option value="Mumbai">Mumbai, India</option>
+                            <option value="Munich">Munich, Germany</option>
+                            <option value="New York">New York, USA</option>
+                            <option value="Oslo">Oslo, Norway</option>
+                            <option value="Paris">Paris, France</option>
+                            <option value="Prague">Prague, Czech Republic</option>
+                            <option value="Rio de Janeiro">Rio de Janeiro, Brazil</option>
+                            <option value="Rome">Rome, Italy</option>
+                            <option value="Seoul">Seoul, South Korea</option>
+                            <option value="Singapore">Singapore</option>
+                            <option value="Stockholm">Stockholm, Sweden</option>
+                            <option value="Sydney">Sydney, Australia</option>
+                            <option value="Tokyo">Tokyo, Japan</option>
+                            <option value="Toronto">Toronto, Canada</option>
+                            <option value="Vienna">Vienna, Austria</option>
+                            <option value="Zurich">Zurich, Switzerland</option>
+                        </select>
+                    </div>
+
+                    <div class="weather-card">
+                        <div class="weather-header">
+                            <div>
+                                <div id="weather-city-name" class="weather-city">Berlin</div>
+                                <div id="weather-status-text" class="weather-status">Overcast / Mild</div>
+                            </div>
+                        </div>
+                        <div class="weather-main">
+                            <div id="weather-temp-val" class="weather-temp">18°C</div>
+                            <div class="weather-icon"><i id="weather-icon-el" class="fa-solid fa-cloud-sun"></i></div>
+                        </div>
+                        <div class="weather-details">
+                            <div class="weather-detail-item">
+                                <i class="fa-solid fa-droplet"></i>
+                                <span>Humidity: <strong id="weather-humidity">68%</strong></span>
+                            </div>
+                            <div class="weather-detail-item">
+                                <i class="fa-solid fa-wind"></i>
+                                <span>Wind: <strong id="weather-wind">14 km/h</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-accordion">
+                    <button class="code-toggle-btn" onclick="toggleCode('code-weather', this)">
+                        <i class="fa-solid fa-chevron-right"></i> VIEW IMPLEMENTATION (climate.py)
+                    </button>
+                    <div id="code-weather" class="code-content">
+                        <pre><code>import requests
+
+def get_climate_data(city_name):
+    # Retrieve atmospheric metrics via Open-Meteo pipeline
+    endpoint = f"https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&current_weather=true"
+    res = requests.get(endpoint)
+    if res.status_code == 200:
+        data = res.json()["current_weather"]
+        return f"{city_name}: {data['temperature']}°C | Wind: {data['windspeed']} km/h"
+    return "Telemetry unreadable."</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. TRANSLATOR (Default: German -> English) -->
+            <div id="translator-tool" class="tool-panel">
+                <div class="trans-wrapper">
+                    <div class="trans-selector-row">
+                        <select id="lang-source">
+                            <option value="de" selected>German</option>
+                            <option value="en">English</option>
+                            <option value="ar">Arabic</option>
+                            <option value="ur">Urdu</option>
+                            <option value="tr">Turkish</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="it">Italian</option>
+                            <option value="ja">Japanese</option>
+                            <option value="zh">Chinese</option>
+                            <option value="hi">Hindi</option>
+                            <option value="ru">Russian</option>
+                        </select>
+                        
+                        <button class="swap-btn" onclick="swapLanguages()"><i class="fa-solid fa-right-left"></i></button>
+
+                        <select id="lang-target">
+                            <option value="en" selected>English</option>
+                            <option value="de">German</option>
+                            <option value="ar">Arabic</option>
+                            <option value="ur">Urdu</option>
+                            <option value="tr">Turkish</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="it">Italian</option>
+                            <option value="ja">Japanese</option>
+                            <option value="zh">Chinese</option>
+                            <option value="hi">Hindi</option>
+                            <option value="ru">Russian</option>
+                        </select>
+                    </div>
+
+                    <textarea id="translate-input" class="trans-textarea" placeholder="Type or paste translation source text..."></textarea>
+
+                    <div style="text-align: center;">
+                        <button class="btn btn-primary" style="width: 100%;" onclick="executeTranslation()">Execute Translation</button>
+                    </div>
+
+                    <div class="trans-output-box">
+                        <div class="trans-output-header">Parsed Target output</div>
+                        <div id="translate-output" class="trans-output-text">Translations will render here...</div>
+                    </div>
+                </div>
+
+                <div class="code-accordion">
+                    <button class="code-toggle-btn" onclick="toggleCode('code-translator', this)">
+                        <i class="fa-solid fa-chevron-right"></i> VIEW IMPLEMENTATION (translator.py)
+                    </button>
+                    <div id="code-translator" class="code-content">
+                        <pre><code>import requests
+
+def translate_logic(text, source_lang, target_lang):
+    # Interfacing with external lookup dictionary mapping pipeline
+    endpoint = "https://api.mymemory.translated.net/get"
+    pair = f"{source_lang}|{target_lang}"
+    response = requests.get(endpoint, params={"q": text, "langpair": pair})
+    
+    if response.status_code == 200:
+        return response.json()["responseData"]["translatedText"]
+    return "Network error: Connection timeout."</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. FX RATE TOOL -->
+            <div id="currency-tool" class="tool-panel">
+                <div class="conv-wrapper">
+                    <div class="conv-group">
+                        <div class="conv-row">
+                            <input type="number" id="fx-amount" value="100" placeholder="Amount">
+                            <select id="fx-from">
+                                <option value="EUR">EUR (€)</option>
+                                <option value="USD" selected>USD ($)</option>
+                                <option value="INR">INR (₹)</option>
+                                <option value="PKR">PKR (Rs)</option>
+                                <option value="AED">AED (AED)</option>
+                                <option value="SAR">SAR (SAR)</option>
+                                <option value="GBP">GBP (£)</option>
+                                <option value="CAD">CAD ($)</option>
+                                <option value="AUD">AUD ($)</option>
+                                <option value="JPY">JPY (¥)</option>
+                                <option value="CHF">CHF (Fr)</option>
+                                <option value="CNY">CNY (¥)</option>
+                            </select>
+                        </div>
+                        <div style="text-align: center;" class="conv-arrow"><i class="fa-solid fa-arrow-down-long"></i></div>
+                        <div class="conv-row">
+                            <input type="text" id="fx-result" readonly placeholder="Converted Output">
+                            <select id="fx-to">
+                                <option value="INR" selected>INR (₹)</option>
+                                <option value="EUR">EUR (€)</option>
+                                <option value="USD">USD ($)</option>
+                                <option value="PKR">PKR (Rs)</option>
+                                <option value="AED">AED (AED)</option>
+                                <option value="SAR">SAR (SAR)</option>
+                                <option value="GBP">GBP (£)</option>
+                                <option value="CAD">CAD ($)</option>
+                                <option value="AUD">AUD ($)</option>
+                                <option value="JPY">JPY (¥)</option>
+                                <option value="CHF">CHF (Fr)</option>
+                                <option value="CNY">CNY (¥)</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="convertCurrency()">Calculate Rate</button>
+                    </div>
+                </div>
+
+                <div class="code-accordion">
+                    <button class="code-toggle-btn" onclick="toggleCode('code-currency', this)">
+                        <i class="fa-solid fa-chevron-right"></i> VIEW IMPLEMENTATION (currency.py)
+                    </button>
+                    <div id="code-currency" class="code-content">
+                        <pre><code># Static Exchange Multiplier Standard Matrix
+RATES = {
+    'USD': 1.0,
+    'EUR': 0.92,
+    'INR': 83.12,
+    'PKR': 278.50,
+    'GBP': 0.79,
+    'AED': 3.67,
+    'SAR': 3.75,
+    'JPY': 155.20
+}
+
+def convert_currency(val, from_curr, to_curr):
+    base = val / RATES[from_curr]
+    return base * RATES[to_curr]</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. TASKS ENGINE -->
+            <div id="todo-tool" class="tool-panel">
+                <div class="todo-wrapper">
+                    <div class="todo-input-row">
+                        <input type="text" id="todo-input" placeholder="Initialize a new objective...">
+                        <button class="btn btn-primary" onclick="addTodo()">Commit Task</button>
+                    </div>
+                    <ul id="todo-list" class="todo-list"></ul>
+                </div>
+
+                <div class="code-accordion">
+                    <button class="code-toggle-btn" onclick="toggleCode('code-todo', this)">
+                        <i class="fa-solid fa-chevron-right"></i> VIEW IMPLEMENTATION (todo.py)
+                    </button>
+                    <div id="code-todo" class="code-content">
+                        <pre><code># Pure CLI Python To-Do Application
+todo_list = []
+
+def add_task(task_name):
+    todo_list.append({"task": task_name, "completed": False})
+
+def toggle_task(index):
+    if 0 <= index < len(todo_list):
+        todo_list[index]["completed"] = not todo_list[index]["completed"]
+
+def delete_task(index):
+    if 0 <= index < len(todo_list):
+        todo_list.pop(index)</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. FOCUS MODULE -->
+            <div id="pomodoro-tool" class="tool-panel">
+                <div class="pomo-wrapper">
+                    <div id="timer-display" class="timer-display">25:00</div>
+                    <div id="timer-label" class="timer-label">Isolated Session State</div>
+
+                    <div class="pomo-controls">
+                        <button class="btn btn-primary" id="pomo-start-btn" onclick="toggleTimer()">Start Focus</button>
+                        <button class="btn btn-secondary" onclick="resetTimer()">Reset</button>
+                    </div>
+
+                    <div class="ambient-box">
+                        <h4>Ambient Audio Layers</h4>
+                        <div class="ambient-grid">
+                            <button class="ambient-btn" onclick="toggleAudio('rain', this)"><i class="fa-solid fa-cloud-rain"></i> Rain</button>
+                            <button class="ambient-btn" onclick="toggleAudio('waves', this)"><i class="fa-solid fa-water"></i> Ocean</button>
+                            <button class="ambient-btn" onclick="toggleAudio('white', this)"><i class="fa-solid fa-sliders"></i> White Noise</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-accordion">
+                    <button class="code-toggle-btn" onclick="toggleCode('code-pomodoro', this)">
+                        <i class="fa-solid fa-chevron-right"></i> VIEW IMPLEMENTATION (focus.py)
+                    </button>
+                    <div id="code-pomodoro" class="code-content">
+                        <pre><code>import time
+
+def focus_timer(duration_minutes=25):
+    seconds = duration_minutes * 60
+    while seconds > 0:
+        mins, secs = divmod(seconds, 60)
+        timer = f"{mins:02d}:{secs:02d}"
+        print(timer, end="\r")
+        time.sleep(1)
+        seconds -= 1
+    print("Session Concluded.")</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. CALCULATOR -->
+            <div id="calculator-tool" class="tool-panel">
+                <div class="calc-wrapper">
+                    <div class="calc-screen">
+                        <div id="calc-formula" class="calc-formula"></div>
+                        <div id="calc-display" class="calc-display">0</div>
+                    </div>
+                    <div class="calc-grid">
+                        <button class="calc-btn op" onclick="clearCalc()">C</button>
+                        <button class="calc-btn op" onclick="backspaceCalc()"><i class="fa-solid fa-delete-left"></i></button>
+                        <button class="calc-btn op" onclick="appendOperator('%')">%</button>
+                        <button class="calc-btn op" onclick="appendOperator('/')">/</button>
+
+                        <button class="calc-btn" onclick="appendNumber('7')">7</button>
+                        <button class="calc-btn" onclick="appendNumber('8')">8</button>
+                        <button class="calc-btn" onclick="appendNumber('9')">9</button>
+                        <button class="calc-btn op" onclick="appendOperator('*')">×</button>
+
+                        <button class="calc-btn" onclick="appendNumber('4')">4</button>
+                        <button class="calc-btn" onclick="appendNumber('5')">5</button>
+                        <button class="calc-btn" onclick="appendNumber('6')">6</button>
+                        <button class="calc-btn op" onclick="appendOperator('-')">-</button>
+
+                        <button class="calc-btn" onclick="appendNumber('1')">1</button>
+                        <button class="calc-btn" onclick="appendNumber('2')">2</button>
+                        <button class="calc-btn" onclick="appendNumber('3')">3</button>
+                        <button class="calc-btn op" onclick="appendOperator('+')">+</button>
+
+                        <button class="calc-btn" style="grid-column: span 2;" onclick="appendNumber('0')">0</button>
+                        <button class="calc-btn" onclick="appendNumber('.')">.</button>
+                        <button class="calc-btn equals" onclick="calculateResult()">=</button>
+                    </div>
+                </div>
+
+                <div class="code-accordion">
+                    <button class="code-toggle-btn" onclick="toggleCode('code-calculator', this)">
+                        <i class="fa-solid fa-chevron-right"></i> VIEW IMPLEMENTATION (calculator.py)
+                    </button>
+                    <div id="code-calculator" class="code-content">
+                        <pre><code># Basic Minimalist Python Terminal Calculator
+
+def calculate(num1, op, num2):
+    if op == '+': return num1 + num2
+    elif op == '-': return num1 - num2
+    elif op == '*': return num1 * num2
+    elif op == '/': return num1 / num2 if num2 != 0 else "Error"
+    elif op == '%': return num1 % num2
+    return 0
+
+print("--- Python Calculator ---")
+try:
+    n1 = float(input("First Number: "))
+    operator = input("Operator (+, -, *, /, %): ").strip()
+    n2 = float(input("Second Number: "))
+    
+    result = calculate(n1, operator, n2)
+    print(f"Result: {result}")
+except ValueError:
+    print("Error: Invalid number representation.")</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. HEALTH INDEX (BMI) -->
+            <div id="bmi-tool" class="tool-panel">
+                <div class="bmi-wrapper">
+                    <div class="bmi-form">
+                        <div class="bmi-input-group">
+                            <label>Height (cm)</label>
+                            <input type="number" id="bmi-height" placeholder="e.g. 180">
+                        </div>
+                        <div class="bmi-input-group">
+                            <label>Mass (kg)</label>
+                            <input type="number" id="bmi-weight" placeholder="e.g. 75">
+                        </div>
+                        <button class="btn btn-primary" onclick="calculateBMI()">Compute Metric Index</button>
+                    </div>
+
+                    <div id="bmi-gauge" class="bmi-gauge">
+                        <div id="bmi-score" class="bmi-score">23.1</div>
+                        <div id="bmi-label" class="bmi-label" style="background: var(--normal);">Optimal</div>
+                        <p id="bmi-desc" class="bmi-desc">Body mass distribution falls inside normal clinical limits.</p>
+                    </div>
+                </div>
+
+                <div class="code-accordion">
+                    <button class="code-toggle-btn" onclick="toggleCode('code-bmi', this)">
+                        <i class="fa-solid fa-chevron-right"></i> VIEW IMPLEMENTATION (index.py)
+                    </button>
+                    <div id="code-bmi" class="code-content">
+                        <pre><code>def compute_bmi(weight_kg, height_cm):
+    height_m = height_cm / 100.0
+    bmi = weight_kg / (height_m ** 2)
+    
+    if bmi < 18.5: status = "Underweight"
+    elif 18.5 <= bmi < 25.0: status = "Normal"
+    elif 25.0 <= bmi < 30.0: status = "Overweight"
+    else: status = "Obese"
+    
+    return round(bmi, 1), status</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. MATRIX CONVERTER -->
+            <div id="converter-tool" class="tool-panel">
+                <div class="conv-wrapper">
+                    <div class="conv-group">
+                        <div class="conv-row">
+                            <input type="number" id="matrix-val" value="1" oninput="convertMatrix()">
+                            <select id="matrix-type" onchange="convertMatrix()">
+                                <option value="km-mi">Kilometers to Miles</option>
+                                <option value="mi-km">Miles to Kilometers</option>
+                                <option value="c-f">Celsius to Fahrenheit</option>
+                                <option value="f-c">Fahrenheit to Celsius</option>
+                                <option value="kg-lbs">Kilograms to Pounds</option>
+                                <option value="lbs-kg">Pounds to Kilograms</option>
+                            </select>
+                        </div>
+                        <div style="text-align: center;" class="conv-arrow"><i class="fa-solid fa-arrow-down-long"></i></div>
+                        <div class="conv-row">
+                            <input type="text" id="matrix-result" readonly placeholder="Output">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-accordion">
+                    <button class="code-toggle-btn" onclick="toggleCode('code-matrix', this)">
+                        <i class="fa-solid fa-chevron-right"></i> VIEW IMPLEMENTATION (matrix.py)
+                    </button>
+                    <div id="code-matrix" class="code-content">
+                        <pre><code>def unit_converter(value, conversion_type):
+    if conversion_type == "km-mi": return value * 0.621371
+    elif conversion_type == "mi-km": return value / 0.621371
+    elif conversion_type == "c-f": return (value * 9/5) + 32
+    elif conversion_type == "f-c": return (value - 32) * 5/9
+    elif conversion_type == "kg-lbs": return value * 2.20462
+    elif conversion_type == "lbs-kg": return value / 2.20462
+    return 0</code></pre>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="about" class="about-section">
+        <div class="about-container">
+            <h2>System Philosophy</h2>
+            <p>Designed around low-latency client evaluation wrapped inside high-contrast monochromatic aesthetics. Pure JS execution pipelines supported by lightweight Python back-ends.</p>
+            <div class="social-links">
+                <a href="https://github.com/5marvv"><i class="fa-brands fa-github"></i> GitHub</a>
+                <a href="https://www.linkedin.com/in/marwa-abubaker"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>
+                <a href="mailto:marwaabubaker@gmail.com"><i class="fa-solid fa-envelope"></i> Contact</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        RUNTIME.SYS // MODULAR WORKSPACE ARCHITECTURE
+    </footer>
+
+    <script>
+        // Tab switching logic
+        function switchTool(toolId, btnEl) {
+            document.querySelectorAll('.tool-panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(toolId).classList.add('active');
+            btnEl.classList.add('active');
+        }
+
+        // Accordion toggle
+        function toggleCode(id, btn) {
+            const content = document.getElementById(id);
+            const icon = btn.querySelector('i');
+            if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                content.style.maxHeight = '0px';
+                icon.className = 'fa-solid fa-chevron-right';
+            } else {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                icon.className = 'fa-solid fa-chevron-down';
+            }
+        }
+
+        // --- TRANSLATOR DUMMY PIPELINE ---
+        function swapLanguages() {
+            const src = document.getElementById('lang-source');
+            const tgt = document.getElementById('lang-target');
+            const temp = src.value;
+            src.value = tgt.value;
+            tgt.value = temp;
+        }
+
+        function executeTranslation() {
+            const input = document.getElementById('translate-input').value;
+            const output = document.getElementById('translate-output');
+            if (!input.trim()) {
+                output.innerText = "Please input valid string content.";
+                return;
+            }
+            output.innerText = "Processing pipeline...\n" + input;
+        }
+
+        // --- CALCULATOR LOGIC ---
+        let calcExpr = "";
+        function appendNumber(n) {
+            const display = document.getElementById('calc-display');
+            if (display.innerText === "0" && n !== ".") display.innerText = "";
+            display.innerText += n;
+            calcExpr += n;
+        }
+        function appendOperator(op) {
+            const display = document.getElementById('calc-display');
+            document.getElementById('calc-formula').innerText = display.innerText + " " + op;
+            calcExpr = display.innerText + op;
+            display.innerText = "0";
+        }
+        function clearCalc() {
+            document.getElementById('calc-display').innerText = "0";
+            document.getElementById('calc-formula').innerText = "";
+            calcExpr = "";
+        }
+        function backspaceCalc() {
+            const display = document.getElementById('calc-display');
+            display.innerText = display.innerText.slice(0, -1) || "0";
+        }
+        function calculateResult() {
+            const display = document.getElementById('calc-display');
+            try {
+                const res = eval(calcExpr + display.innerText);
+                document.getElementById('calc-formula').innerText = calcExpr + display.innerText + " =";
+                display.innerText = res;
+            } catch {
+                display.innerText = "Error";
+            }
+        }
+
+        // --- TASKS ENGINE ---
+        function addTodo() {
+            const input = document.getElementById('todo-input');
+            if (!input.value.trim()) return;
+            
+            const li = document.createElement('li');
+            li.className = 'todo-item';
+            li.innerHTML = `
+                <div class="todo-item-left">
+                    <input type="checkbox" class="todo-checkbox">
+                    <span class="todo-text">${input.value}</span>
+                </div>
+                <button class="todo-delete-btn" onclick="this.parentElement.remove()"><i class="fa-solid fa-trash"></i></button>
+            `;
+            document.getElementById('todo-list').appendChild(li);
+            input.value = "";
+        }
+
+        // --- POMODORO TIMER ---
+        let timerInterval = null;
+        let timeLeft = 25 * 60;
+        let isRunning = false;
+
+        function toggleTimer() {
+            const btn = document.getElementById('pomo-start-btn');
+            if (isRunning) {
+                clearInterval(timerInterval);
+                btn.innerText = "Resume";
+                isRunning = false;
+            } else {
+                isRunning = true;
+                btn.innerText = "Pause";
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+                    const s = (timeLeft % 60).toString().padStart(2, '0');
+                    document.getElementById('timer-display').innerText = `${m}:${s}`;
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        alert("Focus Session Concluded.");
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            timeLeft = 25 * 60;
+            document.getElementById('timer-display').innerText = "25:00";
+            document.getElementById('pomo-start-btn').innerText = "Start Focus";
+        }
+
+        function toggleAudio(type, btn) {
+            btn.classList.toggle('active');
+        }
+
+        // --- FX CONVERTER ---
+        const fxRates = { USD: 1.0, EUR: 0.92, INR: 83.12, PKR: 278.50, GBP: 0.79, AED: 3.67, SAR: 3.75, JPY: 155.20, CAD: 1.37, AUD: 1.51, CHF: 0.91, CNY: 7.24 };
+        function convertCurrency() {
+            const amt = parseFloat(document.getElementById('fx-amount').value) || 0;
+            const from = document.getElementById('fx-from').value;
+            const to = document.getElementById('fx-to').value;
+            
+            const base = amt / fxRates[from];
+            const result = base * fxRates[to];
+            document.getElementById('fx-result').value = result.toFixed(2) + " " + to;
+        }
+
+        // --- HEALTH INDEX (BMI) ---
+        function calculateBMI() {
+            const h = parseFloat(document.getElementById('bmi-height').value) / 100;
+            const w = parseFloat(document.getElementById('bmi-weight').value);
+            
+            if (!h || !w) return;
+            const bmi = (w / (h * h)).toFixed(1);
+            
+            const gauge = document.getElementById('bmi-gauge');
+            const score = document.getElementById('bmi-score');
+            const label = document.getElementById('bmi-label');
+            const desc = document.getElementById('bmi-desc');
+            
+            gauge.classList.add('active');
+            score.innerText = bmi;
+            
+            if (bmi < 18.5) {
+                label.innerText = "Underweight";
+                label.style.background = "var(--underweight)";
+                desc.innerText = "Below recommended statistical threshold.";
+            } else if (bmi < 25) {
+                label.innerText = "Optimal";
+                label.style.background = "var(--normal)";
+                desc.innerText = "Body mass distribution falls within normal clinical limits.";
+            } else if (bmi < 30) {
+                label.innerText = "Overweight";
+                label.style.background = "var(--overweight)";
+                desc.innerText = "Slightly elevated mass proportion.";
+            } else {
+                label.innerText = "Obese";
+                label.style.background = "var(--obese)";
+                desc.innerText = "Exceeds standard recommended threshold.";
+            }
+        }
+
+        // --- MATRIX CONVERTER ---
+        function convertMatrix() {
+            const val = parseFloat(document.getElementById('matrix-val').value) || 0;
+            const type = document.getElementById('matrix-type').value;
+            const res = document.getElementById('matrix-result');
+            
+            let out = 0;
+            if (type === 'km-mi') out = (val * 0.621371).toFixed(2) + " Miles";
+            else if (type === 'mi-km') out = (val / 0.621371).toFixed(2) + " km";
+            else if (type === 'c-f') out = ((val * 9/5) + 32).toFixed(1) + " °F";
+            else if (type === 'f-c') out = ((val - 32) * 5/9).toFixed(1) + " °C";
+            else if (type === 'kg-lbs') out = (val * 2.20462).toFixed(2) + " lbs";
+            else if (type === 'lbs-kg') out = (val / 2.20462).toFixed(2) + " kg";
+            
+            res.value = out;
+        }
+
+        // --- WEATHER TOOL SIMULATOR ---
+        const weatherPresets = {
+            "Berlin": { temp: "18°C", status: "Overcast / Mild", hum: "68%", wind: "14 km/h", icon: "fa-cloud-sun" },
+            "Tokyo": { temp: "22°C", status: "Clear Sky", hum: "52%", wind: "8 km/h", icon: "fa-sun" },
+            "New York": { temp: "26°C", status: "Partly Cloudy", hum: "60%", wind: "18 km/h", icon: "fa-cloud" },
+            "London": { temp: "16°C", status: "Light Rain", hum: "82%", wind: "22 km/h", icon: "fa-cloud-showers-heavy" },
+            "Dubai": { temp: "38°C", status: "Sunny / Extreme Heat", hum: "35%", wind: "12 km/h", icon: "fa-sun" },
+            "Delhi": { temp: "34°C", status: "Hazy Sun", hum: "58%", wind: "10 km/h", icon: "fa-sun" },
+            "Sydney": { temp: "20°C", status: "Clear Skies", hum: "48%", wind: "16 km/h", icon: "fa-sun" }
+        };
+
+        function updateWeather() {
+            const city = document.getElementById('weather-city-select').value;
+            const data = weatherPresets[city] || { temp: "21°C", status: "Scattered Clouds", hum: "55%", wind: "12 km/h", icon: "fa-cloud-sun" };
+            
+            document.getElementById('weather-city-name').innerText = city;
+            document.getElementById('weather-status-text').innerText = data.status;
+            document.getElementById('weather-temp-val').innerText = data.temp;
+            document.getElementById('weather-humidity').innerText = data.hum;
+            document.getElementById('weather-wind').innerText = data.wind;
+            document.getElementById('weather-icon-el').className = `fa-solid ${data.icon}`;
+        }
+
+        // Initialize default matrix calculation state
+        convertMatrix();
+    </script>
+</body>
+</html>

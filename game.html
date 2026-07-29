@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Arcade - Playable Portfolio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="../static/apple-icon-180x180.png">
+    <link rel="icon" type="image/x-icon" href="../static/05-moon_98595.ico">
+
+
+    <style>
+    
+        /* Base Resets & Minimalist Typography */
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --bg-color: #ffffff;
+            --text-primary: #111111;
+            --text-secondary: #666666;
+            --border-color: #e5e5e5;
+            --accent-dark: #000000;
+            --console-bg: #fdfdfd;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            --code-bg: #f8f8f8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Space Grotesk', sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            letter-spacing: 1.5px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            margin-left: 2rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 6rem 2rem 4rem 2rem;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            letter-spacing: 4px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.15;
+            letter-spacing: -1.5px;
+            margin-bottom: 1.5rem;
+        }
+
+        .bio {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-weight: 300;
+            max-width: 700px;
+        }
+
+        /* Tabs System */
+        .arcade-section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .arcade-container {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--bg-color);
+            box-shadow: var(--shadow);
+            margin-bottom: 6rem;
+        }
+
+        .arcade-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            background: #fafafa;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1.25rem;
+            border: none;
+            background: transparent;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: #f1f1f1;
+        }
+
+        .tab-btn.active {
+            color: var(--text-primary);
+            background: var(--bg-color);
+            border-bottom: 2px solid var(--accent-dark);
+        }
+
+        /* Screen Configurations */
+        .game-panel {
+            display: none;
+            padding: 3rem;
+            min-height: 400px;
+        }
+
+        .game-panel.active {
+            display: block;
+        }
+
+        /* Minimalist Inputs & Buttons */
+        input[type="number"], input[type="text"] {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            outline: none;
+            width: 100%;
+            max-width: 200px;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus {
+            border-color: var(--accent-dark);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0.75rem 1.5rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            border: 1px solid var(--accent-dark);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-dark);
+            color: var(--bg-color);
+        }
+
+        .btn-primary:hover {
+            background-color: transparent;
+            color: var(--accent-dark);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: #fafafa;
+        }
+
+        /* Dynamic Feedback Text */
+        .console-feed {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--console-bg);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin-bottom: 2rem;
+            min-height: 80px;
+            white-space: pre-line;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .interaction-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Accordion / Dropdown Code Container */
+        .code-accordion {
+            margin-top: 3rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 2rem;
+        }
+
+        .code-toggle-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+        }
+
+        .code-toggle-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .code-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            background: var(--code-bg);
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+
+        .code-content pre {
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #333333;
+            overflow-x: auto;
+            line-height: 1.5;
+            border-left: 3px solid var(--accent-dark);
+        }
+
+        /* --- GAME SPECIFIC COMPONENT OVERLAYS --- */
+        /* Rock Paper Scissors Choices */
+        .rps-choices {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .choice-card {
+            flex: 1;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: transparent;
+            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        .choice-card:hover {
+            border-color: var(--accent-dark);
+            background: #fafafa;
+        }
+
+        .choice-card i {
+            font-size: 1.5rem;
+        }
+
+        /* Tic Tac Toe Grid */
+        .ttt-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .ttt-cell {
+            aspect-ratio: 1;
+            border: 1px solid var(--border-color);
+            background: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ttt-cell:hover {
+            border-color: var(--accent-dark);
+            background: #fafafa;
+        }
+
+        /* Minimalist Info Sections */
+        .about-section {
+            background-color: #fafafa;
+            border-top: 1px solid var(--border-color);
+            padding: 5rem 2rem;
+        }
+
+        .about-container {
+            max-width: 650px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .about-container h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+        }
+
+        .about-container p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .social-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .social-links a:hover {
+            opacity: 0.6;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2.5rem 2rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.3rem; }
+            .game-panel { padding: 1.5rem; }
+            .interaction-row { flex-direction: column; align-items: stretch; }
+            input[type="number"], input[type="text"] { max-width: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">PY.ARCADE</a>
+            <div class="nav-links">
+                <a href="#arcade">Playroom</a>
+                <a href="#about">Philosophy</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <p class="subtitle"></p>
+            <h1>Play Python Classics.</h1>
+            <p class="bio">An aesthetic developer sandbox where you can play classic CLI games instantly inside the browser, then expand the drawer underneath each game to review the pure Python source structure.</p>
+        </div>
+    </header>
+
+    <section id="arcade" class="arcade-section">
+        <div class="arcade-container">
+            <div class="arcade-tabs">
+                <button class="tab-btn active" onclick="switchGame('guess-game', this)"><i class="fa-solid fa-arrow-up-9-1"></i> Guess Number</button>
+                <button class="tab-btn" onclick="switchGame('rps-game', this)"><i class="fa-solid fa-hand-back-fist"></i> Rock Paper Scissors</button>
+                <button class="tab-btn" onclick="switchGame('hangman-game', this)"><i class="fa-solid fa-font"></i> Hangman</button>
+                <button class="tab-btn" onclick="switchGame('ttt-game', this)"><i class="fa-solid fa-hashtag"></i> Tic-Tac-Toe</button>
+            </div>
+
+            <div id="guess-game" class="game-panel active">
+                <h2>Guess the Number</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">The computer picked a secret target number between 1 and 100.</p>
+                
+                <div id="guess-feed" class="console-feed">Target generated! Type your guess below to play.</div>
+                
+                <div class="interaction-row">
+                    <input type="number" id="guess-input" placeholder="Guess (1-100)" min="1" max="100">
+                    <button class="btn btn-primary" onclick="playGuessGame()">Submit Guess</button>
+                    <button class="btn btn-secondary" onclick="resetGuessGame()">Reset Match</button>
+                </div>
+
+                <div class="code-accordion">
+                    <button class="code-toggle-btn" onclick="toggleCode('code-guess', this)">
+                        <i class="fa-solid fa-chevron-right"></i> View Python Source Code (guess_number.py)
+                    </button>
+                    <div id="code-guess" class="code-content">
+                        <pre><code>import random
+
+# The computer picks a secret target number
+target = random.randint(1, 100)
+
+print("--- GUESS THE NUMBER ---")
+
+while True:
+    guess = input("Enter your guess (1-100) or 'Q' to Quit: ")
+
+    if guess.strip().upper() == 'Q':
+        print("You chose to quit. Goodbye!")
+        break
+
+    try:
+        guess = int(guess)
+    except ValueError:
+        print("Invalid input! Enter a valid number.")
+        continue
+
+    if guess &lt; target:
+        print("Too low! Try again.")
+    elif guess &gt; target:
+        print("Too high! Try again.")
+    else:
+        print("Congratulations! You've guessed the number.")
+        break
+
+print("Game Over")</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div id="rps-game" class="game-panel">
+                <h2>Rock, Paper, Scissors</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Pick your option to clash against the randomized computer selection.</p>
+                
+                <div id="rps-feed" class="console-feed">Match history is clean. Make your choice below:</div>
+                
+                <div class="rps-choices">
+                    <button class="choice-card" onclick="playRPS('rock')">
+                        <i class="fa-solid fa-gem"></i> Rock
+                    </button>
+                    <button class="choice-card" onclick="playRPS('paper')">
+                        <i class="fa-solid fa-note-sticky"></i> Paper
+                    </button>
+                    <button class="choice-card" onclick="playRPS('scissors')">
+                        <i class="fa-solid fa-scissors"></i> Scissors
+                    </button>
+                </div>
+                <div class="interaction-row">
+                    <button class="btn btn-secondary" onclick="resetRPS()">Reset Scores</button>
+                </div>
+
+                <div class="code-accordion">
+                    <button class="code-toggle-btn" onclick="toggleCode('code-rps', this)">
+                        <i class="fa-solid fa-chevron-right"></i> View Python Source Code (rps.py)
+                    </button>
+                    <div id="code-rps" class="code-content">
+                        <pre><code>import random
+
+game_choices = ["rock", "paper", "scissors"]
+
+print("Welcome to Rock, Paper, Scissors!")
+
+while True:
+    user_choice = input("Enter Rock, Paper, or Scissors (or 'Q' to Quit): ").lower().strip()
+
+    if user_choice == 'q':
+        print("Thanks for playing! Goodbye.")
+        break
+
+    if user_choice not in game_choices:
+        print("Invalid choice! Try again.")
+        continue
+
+    computer_choice = random.choice(game_choices)
+    print(f"Computer chose: {computer_choice}")
+
+    if user_choice == computer_choice:
+        print("It's a tie!")
+    elif (user_choice == "rock" and computer_choice == "scissors") or \
+         (user_choice == "paper" and computer_choice == "rock") or \
+         (user_choice == "scissors" and computer_choice == "paper"):
+        print("You win!")
+    else:
+        print("Computer wins!")</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div id="hangman-game" class="game-panel">
+                <h2>Minimalist Hangman</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Type letters to guess the hidden words.</p>
+                
+                <div id="hangman-feed" class="console-feed">Press start or guess a letter.</div>
+                
+                <div class="interaction-row">
+                    <input type="text" id="hangman-input" maxlength="1" placeholder="a-z" style="text-transform: lowercase;">
+                    <button class="btn btn-primary" onclick="playHangman()">Submit Letter</button>
+                    <button class="btn btn-secondary" onclick="resetHangman()">Reset Word</button>
+                </div>
+
+                <div class="code-accordion">
+                    <button class="code-toggle-btn" onclick="toggleCode('code-hangman', this)">
+                        <i class="fa-solid fa-chevron-right"></i> View Python Source Code (hangman.py)
+                    </button>
+                    <div id="code-hangman" class="code-content">
+                        <pre><code>import random
+
+words = ["python", "developer", "aesthetic", "minimal", "logic", "creative"]
+
+def run_hangman():
+    word = random.choice(words)
+    guessed = set()
+    attempts = 6
+    
+    while attempts &gt; 0:
+        display_word = [char if char in guessed else "_" for char in word]
+        print("\nWord: " + " ".join(display_word))
+        
+        if "_" not in display_word:
+            print("You guessed it!")
+            break
+            
+        guess = input("Guess letter (or 'q'): ").lower().strip()
+        if guess == 'q':
+            break
+            
+        guessed.add(guess)
+        if guess not in word:
+            attempts -= 1
+
+if __name__ == "__main__":
+    run_hangman()</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ttt-game" class="game-panel">
+                <h2 style="text-align: center; margin-bottom: 0.5rem;">Tic-Tac-Toe</h2>
+                <p id="ttt-turn-info" style="color: var(--text-secondary); text-align: center; margin-bottom: 2rem;">Player X's turn</p>
+                
+                <div class="ttt-grid">
+                    <div class="ttt-cell" id="c0" onclick="playTTT(0)"></div>
+                    <div class="ttt-cell" id="c1" onclick="playTTT(1)"></div>
+                    <div class="ttt-cell" id="c2" onclick="playTTT(2)"></div>
+                    <div class="ttt-cell" id="c3" onclick="playTTT(3)"></div>
+                    <div class="ttt-cell" id="c4" onclick="playTTT(4)"></div>
+                    <div class="ttt-cell" id="c5" onclick="playTTT(5)"></div>
+                    <div class="ttt-cell" id="c6" onclick="playTTT(6)"></div>
+                    <div class="ttt-cell" id="c7" onclick="playTTT(7)"></div>
+                    <div class="ttt-cell" id="c8" onclick="playTTT(8)"></div>
+                </div>
+
+                <div class="interaction-row" style="justify-content: center;">
+                    <button class="btn btn-secondary" onclick="resetTTT()">Reset Board</button>
+                </div>
+
+                <div class="code-accordion">
+                    <button class="code-toggle-btn" onclick="toggleCode('code-ttt', this)">
+                        <i class="fa-solid fa-chevron-right"></i> View Python Source Code (tictactoe.py)
+                    </button>
+                    <div id="code-ttt" class="code-content">
+                        <pre><code>def print_board(b):
+    print(f" {b[0]} | {b[1]} | {b[2]} \n {b[3]} | {b[4]} | {b[5]} \n {b[6]} | {b[7]} | {b[8]} ")
+
+def check_win(b, player):
+    win_states = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], # Horizontal
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], # Vertical
+        [0, 4, 8], [2, 4, 6]             # Diagonal
+    ]
+    return any(all(b[c] == player for c in state) for state in win_states)</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="about-section">
+        <div class="about-container">
+            <h2>Design Restraint</h2>
+            <p>Great code doesn't hide behind bloated visuals. These engines capture procedural logic directly in beautiful, light-mode, responsive frames.</p>
+            <div class="social-links">
+                <a href="https://github.com/5marvv"><i class="fa-brands fa-github"></i> GitHub</a>
+                <a href="https://www.linkedin.com/in/marwa-abubaker"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>
+                <a href="mailto:marwaabubaker@gmail.com"><i class="fa-solid fa-envelope"></i> Contact</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p></p>
+    </footer>
+
+    <script>
+        // Tab system
+        function switchGame(gameId, buttonEl) {
+            document.querySelectorAll('.game-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(gameId).classList.add('active');
+            buttonEl.classList.add('active');
+        }
+
+        // Accordion toggle animation logic
+        function toggleCode(targetId, buttonEl) {
+            const container = document.getElementById(targetId);
+            const icon = buttonEl.querySelector('i');
+            
+            if (container.style.maxHeight) {
+                container.style.maxHeight = null;
+                icon.className = 'fa-solid fa-chevron-right';
+            } else {
+                container.style.maxHeight = container.scrollHeight + "px";
+                icon.className = 'fa-solid fa-chevron-down';
+            }
+        }
+
+        // ========================
+        // GAME 1: GUESS THE NUMBER
+        // ========================
+        let targetNumber = Math.floor(Math.random() * 100) + 1;
+        let guessAttempts = 0;
+
+        function playGuessGame() {
+            const input = document.getElementById('guess-input');
+            const feed = document.getElementById('guess-feed');
+            const value = parseInt(input.value);
+
+            if (isNaN(value) || value < 1 || value > 100) {
+                feed.textContent = "Please enter a valid number between 1 and 100.";
+                return;
+            }
+
+            guessAttempts++;
+            if (value < targetNumber) {
+                feed.textContent = `[Attempt ${guessAttempts}] ${value} is too low! Try again.`;
+            } else if (value > targetNumber) {
+                feed.textContent = `[Attempt ${guessAttempts}] ${value} is too high! Try again.`;
+            } else {
+                feed.textContent = `★ Congratulations! You guessed the target number ${targetNumber} correctly in ${guessAttempts} attempts! ★`;
+            }
+            input.value = '';
+        }
+
+        function resetGuessGame() {
+            targetNumber = Math.floor(Math.random() * 100) + 1;
+            guessAttempts = 0;
+            document.getElementById('guess-feed').textContent = "Target reset! Enter a new guess.";
+        }
+
+        // ========================
+        // GAME 2: ROCK PAPER SCISSORS
+        // ========================
+        let rpsHistory = [];
+        const rpsChoices = ['rock', 'paper', 'scissors'];
+
+        function playRPS(userSelection) {
+            const botSelection = rpsChoices[Math.floor(Math.random() * 3)];
+            let result = "";
+
+            if (userSelection === botSelection) {
+                result = "It's a Tie!";
+            } else if (
+                (userSelection === 'rock' && botSelection === 'scissors') ||
+                (userSelection === 'paper' && botSelection === 'rock') ||
+                (userSelection === 'scissors' && botSelection === 'paper')
+            ) {
+                result = "You Won!";
+            } else {
+                result = "Computer Won.";
+            }
+
+            const matchEntry = `You picked: ${userSelection.toUpperCase()} | Computer picked: ${botSelection.toUpperCase()}\n→ ${result}`;
+            document.getElementById('rps-feed').textContent = matchEntry;
+        }
+
+        function resetRPS() {
+            document.getElementById('rps-feed').textContent = "Score and history reset.";
+        }
+
+        // ========================
+        // GAME 3: HANGMAN
+        // ========================
+        const hangmanWords = ["python", "developer", "aesthetic", "minimal", "logic", "creative"];
+        let selectedWord = "";
+        let guessedLetters = [];
+        let remainingAttempts = 6;
+
+        function initHangman() {
+            selectedWord = hangmanWords[Math.floor(Math.random() * hangmanWords.length)];
+            guessedLetters = [];
+            remainingAttempts = 6;
+            updateHangmanUI();
+        }
+
+        function updateHangmanUI() {
+            let displayString = "";
+            for (let char of selectedWord) {
+                if (guessedLetters.includes(char)) {
+                    displayString += char + " ";
+                } else {
+                    displayString += "_ ";
+                }
+            }
+
+            const feed = document.getElementById('hangman-feed');
+            
+            if (!displayString.includes("_")) {
+                feed.textContent = `★ Victory! The word was "${selectedWord}". You saved the hangman! ★`;
+            } else if (remainingAttempts <= 0) {
+                feed.textContent = `Game Over. The word was "${selectedWord}".`;
+            } else {
+                feed.textContent = `Word: ${displayString}\nAttempts Remaining: ${remainingAttempts}\nGuessed: [${guessedLetters.join(', ')}]`;
+            }
+        }
+
+        function playHangman() {
+            const input = document.getElementById('hangman-input');
+            const letter = input.value.toLowerCase().trim();
+            input.value = '';
+
+            if (letter.length !== 1 || !/[a-z]/.test(letter)) {
+                return;
+            }
+
+            if (guessedLetters.includes(letter)) {
+                return;
+            }
+
+            guessedLetters.push(letter);
+            if (!selectedWord.includes(letter)) {
+                remainingAttempts--;
+            }
+            updateHangmanUI();
+        }
+
+        function resetHangman() {
+            initHangman();
+        }
+
+        // Initialize Hangman word on page load
+        initHangman();
+
+        // ========================
+        // GAME 4: TIC-TAC-TOE
+        // ========================
+        let tttBoard = Array(9).fill("");
+        let tttPlayer = "X";
+        let tttActive = true;
+
+        const tttWinConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        function playTTT(cellIdx) {
+            if (!tttActive || tttBoard[cellIdx] !== "") return;
+
+            tttBoard[cellIdx] = tttPlayer;
+            document.getElementById(`c${cellIdx}`).textContent = tttPlayer;
+
+            if (checkTTTWin()) {
+                document.getElementById('ttt-turn-info').innerHTML = `<span style="color: black; font-weight:700;">★ Player ${tttPlayer} Wins! ★</span>`;
+                tttActive = false;
+                return;
+            }
+
+            if (!tttBoard.includes("")) {
+                document.getElementById('ttt-turn-info').textContent = "It's a draw!";
+                tttActive = false;
+                return;
+            }
+
+            tttPlayer = tttPlayer === "X" ? "O" : "X";
+            document.getElementById('ttt-turn-info').textContent = `Player ${tttPlayer}'s turn`;
+        }
+
+        function checkTTTWin() {
+            return tttWinConditions.some(condition => {
+                return condition.every(index => tttBoard[index] === tttPlayer);
+            });
+        }
+
+        function resetTTT() {
+            tttBoard = Array(9).fill("");
+            tttPlayer = "X";
+            tttActive = true;
+            document.getElementById('ttt-turn-info').textContent = "Player X's turn";
+            for (let i = 0; i < 9; i++) {
+                document.getElementById(`c${i}`).textContent = "";
+            }
+        }
+    </script>
+</body>
+</html>

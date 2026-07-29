@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Dispatch</title>
+
+      <meta name="msapplication-tap-highlight" content="no">
+  
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-icon-180x180.png">
+  <link href="assets/05-moon_98595.ico" rel="icon">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* Only changing the font stack to Times New Roman */
+        body {
+            font-family: 'Times New Roman', Times, Georgia, serif !important;
+        }
+    </style>
+</head>
+<body class="bg-white text-black antialiased selection:bg-neutral-100">
+
+    <!-- Reduced padding from py-10 to py-4 to save space -->
+    <nav class="max-w-7xl mx-auto px-12 py-4 flex justify-between items-center text-sm tracking-widest text-neutral-900 border-b border-neutral-200">
+        <div class="flex items-center gap-4">
+            <a href="dashboard.html" class="text-xs font-medium tracking-widest uppercase border-b border-neutral-900 pb-1 hover:text-neutral-500 hover:border-neutral-400 transition-colors">
+                ← Back to Overview
+            </a>
+        </div>
+    </nav>
+
+    <!-- Reduced top padding from pt-16 to pt-4 -->
+    <main class="max-w-7xl mx-auto px-12 pt-4 pb-24">
+        
+        <!-- Reduced bottom margin from mb-16 to mb-2 to pull the dashboard up -->
+        <header class="max-w-4xl mx-auto text-center mb-2 relative py-2">
+            <div class="px-24">
+                <h1 class="text-4xl font-bold tracking-tight text-black border-l-2 border-r-2 border-neutral-400 px-6 py-2 inline-block my-2">
+                    
+                   Visual Dispatch
+
+                </h1>
+                <p class="text-sm text-neutral-500 max-w-2xl mx-auto mt-4 leading-relaxed tracking-wide">
+                    
+                    An interactive performance control panel built to bridge raw data streams, fulfillment workflows, and transaction metrics into a unified reporting layout.
+                
+                
+                </p>
+            </div>
+        </header>
+
+        <!-- Container wrapper setup remains completely UNTOUCHED and identical to original -->
+        <section class="w-full overflow-hidden rounded-md border border-neutral-300 bg-neutral-50 mb-4" style="height: 650px;">
+            <div class="w-full h-full overflow-auto relative">
+                <div id="dashboardFrameWrapper" class="w-full h-full" style="transform-origin: top left; transition: transform 0.2s ease-in-out; transform: scale(0.6); width: 166.66%; height: 166.66%;">
+                    <iframe 
+                        src="https://1drv.ms/x/c/dbdee8af117a5a65/IQTJhg29t6wbSrpGY1JMFPt-AWmAlT6E9JEnAYAKHz6OYF8?em=2&wdAllowInteractivity=False&wdHideGridlines=True&wdHideHeaders=True&wdDownloadButton=True&wdInConfigurator=True"
+                        width="100%" 
+                        height="100%" 
+                        frameborder="0" 
+                        scrolling="no"
+                        class="block"
+                    ></iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reduced bottom margin from mb-16 to mb-6 -->
+        <div class="flex items-center justify-between text-xs tracking-wider px-1 mb-6">
+            <div class="flex items-center gap-3 bg-neutral-50 border border-neutral-300 rounded px-3 py-1.5 text-neutral-700">
+                <button onclick="adjustDashboardZoom(-0.05)" class="hover:text-black transition-colors px-1 font-bold">-</button>
+                <span id="zoomLevelDisplay" class="text-xs uppercase tracking-widest select-none font-bold">View: 60%</span>
+                <button onclick="adjustDashboardZoom(0.05)" class="hover:text-black transition-colors px-1 font-bold">+</button>
+                <button onclick="resetDashboardZoom()" class="hover:text-black transition-colors ml-2 pl-2 border-l border-neutral-300 text-xs uppercase">Reset</button>
+            </div>
+            <a href="https://5marvv.github.io/Excel/visuals/" class="text-neutral-500 hover:text-black tracking-wide font-bold border-b border-neutral-400 pb-0.5 transition-all inline-flex items-center gap-1">
+                Learn how this dashboard was built ↗
+            </a>
+        </div>
+
+        <!-- Reduced top padding from pt-12 to pt-6 -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto pt-6 border-t border-neutral-200">
+            <div>
+                <h5 class="text-sm font-bold text-black uppercase tracking-wider mb-2">1 / Customer Experience</h5>
+                <p class="text-xs text-neutral-600 leading-relaxed tracking-wide">
+                    Tracks ticket volume spikes, agent performance vectors, and operational capacity trends across active service windows.
+                </p>
+            </div>
+            <div>
+                <h5 class="text-sm font-bold text-black uppercase tracking-wider mb-2">2 / Financial Velocity</h5>
+                <p class="text-xs text-neutral-600 leading-relaxed tracking-wide">
+                    Monitors overall daily revenue tracking, transactional value distributions, and specialized volume groupings.
+                </p>
+            </div>
+            <div>
+                <h5 class="text-sm font-bold text-black uppercase tracking-wider mb-2">3 / Pipeline Analytics</h5>
+                <p class="text-xs text-neutral-600 leading-relaxed tracking-wide">
+                    Evaluates specific order streams, channel splits, discount trends, and performance parameters.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        let currentZoomScale = 0.6; 
+        const targetWrapper = document.getElementById('dashboardFrameWrapper');
+        const zoomIndicator = document.getElementById('zoomLevelDisplay');
+
+        function updateWrapperLayoutStyles() {
+            targetWrapper.style.transform = `scale(${currentZoomScale})`;
+            targetWrapper.style.width = `${100 / currentZoomScale}%`;
+            targetWrapper.style.height = `${100 / currentZoomScale}%`;
+            zoomIndicator.textContent = `View: ${Math.round(currentZoomScale * 100)}%`;
+        }
+
+        function adjustDashboardZoom(scaleDelta) {
+            currentZoomScale = Math.max(0.3, Math.min(1.2, currentZoomScale + scaleDelta));
+            updateWrapperLayoutStyles();
+        }
+
+        function resetDashboardZoom() {
+            currentZoomScale = 0.6;
+            updateWrapperRangeStyles();
+            updateWrapperLayoutStyles();
+        }
+    </script>
+
+</body>
+</html>

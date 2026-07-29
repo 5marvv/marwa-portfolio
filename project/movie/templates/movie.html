@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-icon-180x180.png">
+    <link rel="icon" type="image/x-icon" href="/assets/05-moon_98595.ico">
+
+    <title>KINO.SPIEL // Film Curation Engine</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --bg-main: #090909;        /* True pure deep black background */
+            --bg-surface: #121212;     /* Elevated modular containers */
+            --bg-control: #1a1a1a;     /* Interactive elements & inputs */
+            --text-white: #ffffff;
+            --text-muted: #8c8c8c;
+            --accent-red: #767764;     /* Cinematic High-contrast Red */
+            --border-subtle: #222222;  /* Thin high-end panel borders */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-white);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Watchlist Curation Drawer (Sidebar) */
+        aside {
+            width: 320px;
+            background-color: var(--bg-surface);
+            border-right: 1px solid var(--border-subtle);
+            padding: 2.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 10;
+        }
+
+        .aside-header {
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .watchlist-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+            flex: 1;
+            scrollbar-width: none;
+        }
+
+        .watchlist-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .watchlist-item {
+            background-color: var(--bg-control);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .watchlist-item span {
+            font-size: 0.9rem;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 200px;
+        }
+
+        .watchlist-item button {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .watchlist-item button:hover {
+            color: var(--accent-red);
+        }
+
+        /* Main Curation Deck */
+        main {
+            margin-left: 320px;
+            flex: 1;
+            padding: 3rem;
+            max-width: 1200px;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        header h1 span {
+            color: var(--accent-red);
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        /* Tactical Search Console */
+        .search-container {
+            margin: 3rem 0;
+            position: relative;
+        }
+
+        .search-container input {
+            width: 100%;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 1.15rem 1.5rem 1.15rem 3.5rem;
+            font-family: inherit;
+            color: var(--text-white);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.25s;
+        }
+
+        .search-container input:focus {
+            border-color: var(--accent-red);
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Interactive Grid Arrays */
+        .feed-section {
+            margin-bottom: 4rem;
+        }
+
+        .feed-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .movie-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .movie-card:hover {
+            transform: scale(1.03);
+            border-color: var(--accent-red);
+        }
+
+        .movie-card img {
+            width: 100%;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+        }
+
+        .movie-info {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .movie-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-rating {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Custom Detail Deck Drawer */
+        .detail-drawer {
+            display: none;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 4rem;
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-wrapper {
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        .detail-poster {
+            width: 220px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .detail-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .detail-title {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .detail-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .detail-overview {
+            line-height: 1.6;
+            color: #d1d1d1;
+            font-size: 0.95rem;
+        }
+
+        .detail-controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            background-color: var(--bg-control);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-white);
+            padding: 0.75rem 1.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            border-color: var(--text-white);
+        }
+
+        .btn-accent {
+            background-color: var(--accent-red);
+            border-color: var(--accent-red);
+        }
+
+        .btn-accent:hover {
+            background-color: #ff1f2a;
+            border-color: #ff1f2a;
+        }
+
+        /* Star Interactive Grid */
+        .stars-row {
+            display: flex;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .stars-row i {
+            color: var(--text-muted);
+            transition: color 0.1s;
+        }
+
+        .stars-row i.active {
+            color: #ffc107; /* Bright Amber */
+        }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div class="aside-header">Curation Deck</div>
+        <div id="watchlist" class="watchlist-container"></div>
+    </aside>
+
+    <main>
+        <header>
+            <h1>KINO<span>.SPIEL</span></h1>
+            <p>Sleek Film Recommendation Engine & Watchlist</p>
+        </header>
+
+        <div class="search-container">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="search-input" placeholder="Query a movie title to trigger similarity matrices...">
+        </div>
+
+        <section id="detail-drawer" class="detail-drawer">
+            <div class="detail-wrapper">
+                <img id="d-poster" class="detail-poster" src="" alt="Poster">
+                <div class="detail-content">
+                    <h2 id="d-title" class="detail-title">Movie Title</h2>
+                    <div class="detail-meta">
+                        <span id="d-release"><i class="fa-regular fa-calendar"></i> N/A</span>
+                        <span id="d-avg-rating"><i class="fa-solid fa-star"></i> N/A</span>
+                    </div>
+                    <p id="d-overview" class="detail-overview">Overview text goes here.</p>
+                    
+                    <div class="detail-controls">
+                        <button id="watchlist-toggle-btn" class="btn btn-accent" onclick="toggleWatchlist()">
+                            <i class="fa-solid fa-plus"></i> Add to Watchlist
+                        </button>
+                        
+                        <div style="display:flex; flex-direction:column; gap:6px; margin-left: 1.5rem;">
+                            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-family:'JetBrains Mono';">Rate Movie</div>
+                            <div class="stars-row" id="stars-row">
+                                <i class="fa-solid fa-star" data-rating="1"></i>
+                                <i class="fa-solid fa-star" data-rating="2"></i>
+                                <i class="fa-solid fa-star" data-rating="3"></i>
+                                <i class="fa-solid fa-star" data-rating="4"></i>
+                                <i class="fa-solid fa-star" data-rating="5"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 3rem;">
+                <h3 style="font-size:1rem; font-weight:700; margin-bottom:1.5rem; text-transform:uppercase; letter-spacing:1px; font-family:'JetBrains Mono';">🧬 Engineered Similar Recommendations:</h3>
+                <div id="recs-grid" class="movie-grid"></div>
+            </div>
+        </section>
+
+        <section class="feed-section">
+            <h2 id="feed-heading" class="feed-title" style="text-transform:uppercase; letter-spacing:2px; font-family:'JetBrains Mono'; font-size:0.9rem; color:var(--text-muted);">🔥 Trending This Week</h2>
+            <div id="movie-feed" class="movie-grid"></div>
+        </section>
+    </main>
+
+<script>
+        const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
+        let activeMovie = null;
+        let watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
+        let ratings = JSON.parse(localStorage.getItem('ratings')) || {};
+
+        // Run on Startup
+        document.addEventListener("DOMContentLoaded", () => {
+            loadTrending();
+            renderWatchlist();
+            initSearch();
+            initStarListeners();
+        });
+
+        // 1. Fetch Trending Movies on Load (Updated Proxy Path)
+        async function loadTrending() {
+            try {
+                const res = await fetch('/api/movie/api/trending');
+                const movies = await res.json();
+                renderMovieGrid(movies, 'movie-feed');
+            } catch (err) {
+                console.error("Failed to load trending data:", err);
+            }
+        }
+
+        // 2. Search Engine Listener (Updated Proxy Path)
+        function initSearch() {
+            const searchInput = document.getElementById('search-input');
+            let timeout = null;
+            
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(timeout);
+                const query = e.target.value.trim();
+                
+                if (!query) {
+                    document.getElementById('feed-heading').textContent = "🔥 Trending This Week";
+                    loadTrending();
+                    return;
+                }
+
+                // Debounce input to reduce unnecessary server requests
+                timeout = setTimeout(async () => {
+                    document.getElementById('feed-heading').textContent = `🔍 Search Results for "${query}"`;
+                    const res = await fetch(`/api/movie/api/search?q=${encodeURIComponent(query)}`);
+                    const movies = await res.json();
+                    renderMovieGrid(movies, 'movie-feed');
+                }, 350);
+            });
+        }
+
+        // 3. Render Movie Grids
+        function renderMovieGrid(movies, targetElementId) {
+            const grid = document.getElementById(targetElementId);
+            grid.innerHTML = '';
+
+            if (movies.length === 0) {
+                grid.innerHTML = `<p style="grid-column: 1/-1; color: var(--text-muted); font-size: 0.9rem;">No titles found matching this structured query.</p>`;
+                return;
+            }
+
+            movies.forEach(movie => {
+                const posterPath = movie.poster_path ? `${IMAGE_BASE_URL}${movie.poster_path}` : 'https://via.placeholder.com/500x750?text=No+Poster';
+                const card = document.createElement('div');
+                card.className = 'movie-card';
+                card.onclick = () => selectMovie(movie);
+                card.innerHTML = `
+                    <img src="${posterPath}" alt="${movie.title}">
+                    <div class="movie-info">
+                        <div class="movie-title">${movie.title}</div>
+                        <div class="movie-rating"><i class="fa-solid fa-star" style="color: #ffc107;"></i> ${movie.vote_average ? movie.vote_average.toFixed(1) : '0.0'}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // 4. Handle Movie Selection & Load Details/Recommendations (Updated Proxy Path)
+        async function selectMovie(movie) {
+            activeMovie = movie;
+            const drawer = document.getElementById('detail-drawer');
+            drawer.style.display = 'block';
+            window.scrollTo({ top: drawer.offsetTop - 40, behavior: 'smooth' });
+
+            // Set Details
+            const posterPath = movie.poster_path ? `${IMAGE_BASE_URL}${movie.poster_path}` : 'https://via.placeholder.com/500x750?text=No+Poster';
+            document.getElementById('d-poster').src = posterPath;
+            document.getElementById('d-title').textContent = movie.title;
+            document.getElementById('d-release').innerHTML = `<i class="fa-regular fa-calendar"></i> ${movie.release_date || 'N/A'}`;
+            document.getElementById('d-avg-rating').innerHTML = `<i class="fa-solid fa-star" style="color: #ffc107;"></i> ${movie.vote_average ? movie.vote_average.toFixed(1) : '0.0'} / 10`;
+            document.getElementById('d-overview').textContent = movie.overview || 'No description summary currently loaded.';
+
+            updateWatchlistBtn();
+            updateStarUI();
+
+            // Fetch Similarity Recommendations
+            try {
+                const res = await fetch(`/api/movie/api/recommendations/${movie.id}`);
+                const recs = await res.json();
+                renderMovieGrid(recs, 'recs-grid');
+            } catch (err) {
+                console.error("Failed to load recommendations:", err);
+            }
+        }
+
+        // 5. Watchlist System (LocalStorage)
+        function renderWatchlist() {
+            const container = document.getElementById('watchlist');
+            container.innerHTML = '';
+            
+            if (watchlist.length === 0) {
+                container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; margin-top: 2rem;">Watchlist database is empty. Add films below.</div>`;
+                return;
+            }
+
+            watchlist.forEach(movie => {
+                const item = document.createElement('div');
+                item.className = 'watchlist-item';
+                
+                const span = document.createElement('span');
+                span.textContent = `🎬 ${movie.title}`;
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = `<i class="fa-solid fa-trash-can"></i>`;
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    removeFromWatchlist(movie.id);
+                };
+                
+                item.appendChild(span);
+                item.appendChild(deleteBtn);
+                container.appendChild(item);
+            });
+        }
+
+        function toggleWatchlist() {
+            if (!activeMovie) return;
+            const index = watchlist.findIndex(m => m.id === activeMovie.id);
+            if (index > -1) {
+                watchlist.splice(index, 1);
+            } else {
+                watchlist.push({ id: activeMovie.id, title: activeMovie.title });
+            }
+            localStorage.setItem('watchlist', JSON.stringify(watchlist));
+            renderWatchlist();
+            updateWatchlistBtn();
+        }
+
+        function removeFromWatchlist(id) {
+            watchlist = watchlist.filter(m => m.id !== id);
+            localStorage.setItem('watchlist', JSON.stringify(watchlist));
+            renderWatchlist();
+            if (activeMovie && activeMovie.id === id) {
+                updateWatchlistBtn();
+            }
+        }
+
+        function updateWatchlistBtn() {
+            const btn = document.getElementById('watchlist-toggle-btn');
+            const isInWatchlist = watchlist.some(m => m.id === activeMovie.id);
+            if (isInWatchlist) {
+                btn.innerHTML = `<i class="fa-solid fa-check"></i> Added to Watchlist`;
+                btn.style.backgroundColor = "var(--bg-control)";
+                btn.style.borderColor = "var(--text-white)";
+            } else {
+                btn.innerHTML = `<i class="fa-solid fa-plus"></i> Add to Watchlist`;
+                btn.style.backgroundColor = "var(--accent-red)";
+                btn.style.borderColor = "var(--accent-red)";
+            }
+        }
+
+        // 6. Local Session Star Ratings
+        function initStarListeners() {
+            const stars = document.querySelectorAll('#stars-row i');
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    if (!activeMovie) return;
+                    const rating = parseInt(star.getAttribute('data-rating'));
+                    ratings[activeMovie.id] = rating;
+                    localStorage.setItem('ratings', JSON.stringify(ratings));
+                    updateStarUI();
+                });
+            });
+        }
+
+        function updateStarUI() {
+            if (!activeMovie) return;
+            const userRating = ratings[activeMovie.id] || 0;
+            const stars = document.querySelectorAll('#stars-row i');
+            stars.forEach(star => {
+                const starVal = parseInt(star.getAttribute('data-rating'));
+                if (starVal <= userRating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

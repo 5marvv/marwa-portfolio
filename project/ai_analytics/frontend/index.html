@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA // Predictive Intelligence</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-icon-180x180.png">
+    <link rel="icon" type="image/x-icon" href="/assets/05-moon_98595.ico">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        heritage: {
+                            stone: '#f4f1ea',      /* Light background stone */
+                            cream: '#fcfbf7',      /* Card light background */
+                            charcoal: '#111315',   /* Dark mode background */
+                            cardDark: '#181a1d',   /* Dark mode card */
+                            slate: '#2c3539',      /* Deep slate accent */
+                            sage: '#879883',       /* Muted sage green */
+                            taupe: '#b5a897',      /* Muted taupe/gold */
+                            burgundy: '#8c424e',   /* Muted heritage red/burgundy */
+                            borderLight: '#e5e0d8',
+                            borderDark: '#282c30'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Newsreader (serif) + Inter (sans) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif-title { font-family: 'Newsreader', serif; }
+    </style>
+</head>
+<body class="bg-heritage-stone dark:bg-heritage-charcoal text-slate-800 dark:text-slate-200 min-h-screen transition-colors duration-300">
+
+    <div class="max-w-7xl mx-auto px-8 py-10">
+        
+        <!-- Header -->
+        <header class="flex justify-between items-center pb-6 border-b border-heritage-borderLight dark:border-heritage-borderDark mb-10">
+            <div>
+                <h1 class="text-2xl font-serif-title tracking-[0.35em] text-slate-900 dark:text-white uppercase font-medium">
+                    AURA
+                </h1>
+                <p class="text-[10px] tracking-[0.2em] uppercase text-slate-400 dark:text-slate-500 mt-1">
+                    Predictive Analytics & Risk Platform
+                </p>
+            </div>
+            
+            <div class="flex items-center gap-5">
+                <button id="theme-toggle" onclick="toggleTheme()" class="px-3.5 py-1.5 rounded-full border border-heritage-borderLight dark:border-heritage-borderDark bg-heritage-cream dark:bg-heritage-cardDark text-xs font-medium text-slate-700 dark:text-slate-300 hover:opacity-80 transition">
+                    🌙 Dark Mode
+                </button>
+                <span class="text-[10px] font-mono tracking-widest text-heritage-sage uppercase font-medium">● System Live</span>
+            </div>
+        </header>
+
+        <!-- Executive KPI Banner -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div class="bg-heritage-cream dark:bg-heritage-cardDark border border-heritage-borderLight dark:border-heritage-borderDark p-6 rounded-xl shadow-sm">
+                <p class="text-xs font-medium uppercase tracking-widest text-slate-400">Total Monitored Profiles</p>
+                <h2 id="kpi-total" class="text-3xl font-serif-title mt-2 text-slate-900 dark:text-white">--</h2>
+            </div>
+            <div class="bg-heritage-cream dark:bg-heritage-cardDark border border-heritage-borderLight dark:border-heritage-borderDark p-6 rounded-xl shadow-sm">
+                <p class="text-xs font-medium uppercase tracking-widest text-slate-400">Mean Churn Probability</p>
+                <h2 id="kpi-avg-risk" class="text-3xl font-serif-title mt-2 text-slate-800 dark:text-slate-200">--%</h2>
+            </div>
+            <div class="bg-heritage-cream dark:bg-heritage-cardDark border border-heritage-borderLight dark:border-heritage-borderDark p-6 rounded-xl shadow-sm">
+                <p class="text-xs font-medium uppercase tracking-widest text-slate-400">High Risk Cohort</p>
+                <h2 id="kpi-high-risk" class="text-3xl font-serif-title mt-2 text-heritage-burgundy">--</h2>
+                <p id="kpi-high-risk-pct" class="text-xs text-slate-400 mt-1">--% share</p>
+            </div>
+            <div class="bg-heritage-cream dark:bg-heritage-cardDark border border-heritage-borderLight dark:border-heritage-borderDark p-6 rounded-xl shadow-sm">
+                <p class="text-xs font-medium uppercase tracking-widest text-slate-400">Revenue at Risk</p>
+                <h2 id="kpi-revenue" class="text-3xl font-serif-title mt-2 text-slate-900 dark:text-white">--</h2>
+            </div>
+        </section>
+
+        <!-- Charts & Conversational AI -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+            
+            <!-- Chart Card -->
+            <div class="lg:col-span-2 bg-heritage-cream dark:bg-heritage-cardDark border border-heritage-borderLight dark:border-heritage-borderDark p-6 rounded-xl shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-sm font-medium tracking-wide uppercase text-slate-700 dark:text-slate-300">Risk Segmentation Distribution</h3>
+                    <span class="text-xs font-serif-title italic text-slate-400">Random Forest Classifier</span>
+                </div>
+                <div class="h-64">
+                    <canvas id="riskChart"></canvas>
+                </div>
+            </div>
+
+            <!-- AI Copilot Panel -->
+            <div class="bg-heritage-cream dark:bg-heritage-cardDark border border-heritage-borderLight dark:border-heritage-borderDark p-6 rounded-xl shadow-sm flex flex-col justify-between">
+                <div>
+                    <h3 class="text-sm font-medium tracking-wide uppercase text-slate-700 dark:text-slate-300 mb-4">Conversational Analytics</h3>
+
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <button onclick="sendQuickPrompt('What is the financial risk exposure?')" class="text-xs px-3 py-1 rounded-full border border-heritage-borderLight dark:border-heritage-borderDark bg-heritage-stone dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-400 transition">Financial Impact</button>
+                        <button onclick="sendQuickPrompt('What are the primary churn drivers?')" class="text-xs px-3 py-1 rounded-full border border-heritage-borderLight dark:border-heritage-borderDark bg-heritage-stone dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-400 transition">SHAP Drivers</button>
+                    </div>
+
+                    <div id="ai-response" class="p-4 rounded-lg bg-heritage-stone dark:bg-heritage-charcoal border border-heritage-borderLight dark:border-heritage-borderDark text-sm leading-relaxed text-slate-700 dark:text-slate-300 min-h-[110px]">
+                        Select a query or ask a question below to analyze dataset trends in natural language.
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <div class="flex gap-2 mb-3">
+                        <input id="ai-input" type="text" placeholder="Inquire dataset..." class="w-full text-sm px-3.5 py-2 rounded-lg border border-heritage-borderLight dark:border-heritage-borderDark bg-heritage-stone dark:bg-heritage-charcoal text-slate-800 dark:text-slate-200 focus:outline-none focus:border-slate-400">
+                        <button onclick="askAI()" class="px-4 py-2 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-medium rounded-lg text-xs tracking-wider uppercase transition">Query</button>
+                    </div>
+                    
+                    <button onclick="triggerWorkflow()" class="w-full py-2.5 bg-heritage-slate hover:bg-slate-800 text-white font-medium text-xs tracking-wider uppercase rounded-lg transition">
+                        Dispatch Automated Sequence
+                    </button>
+                    <p id="workflow-status" class="hidden text-xs text-center text-heritage-sage mt-2 font-medium"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Customer Queue Table -->
+        <section class="bg-heritage-cream dark:bg-heritage-cardDark border border-heritage-borderLight dark:border-heritage-borderDark p-6 rounded-xl shadow-sm">
+            <h3 class="text-sm font-medium tracking-wide uppercase text-slate-700 dark:text-slate-300 mb-4">High Risk Accounts Queue</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="border-b border-heritage-borderLight dark:border-heritage-borderDark text-slate-400 text-xs uppercase tracking-wider font-medium">
+                        <tr>
+                            <th class="py-3 px-4">Profile Reference</th>
+                            <th class="py-3 px-4">Risk Classification</th>
+                            <th class="py-3 px-4">Predicted Churn Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customer-table-body" class="divide-y divide-heritage-borderLight dark:divide-heritage-borderDark">
+                        <!-- Dynamic JavaScript Rows -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Application JavaScript -->
+
+<script>
+const BASE =
+    window.location.pathname.startsWith("/api/ai-analytics")
+        ? "/api/ai-analytics"
+        : "";
+</script>
+
+    <script src="static/app.js"></script>
+</body>
+</html>

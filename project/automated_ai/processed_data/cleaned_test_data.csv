@@ -1,0 +1,8 @@
+User_ID,Name,Age,Salary,Country
+101,Marwa,24.0,75000.0,Germany
+102,Alex,30.0,82000.0,USA
+103,Sam,,61000.0,UK
+101,Marwa,24.0,75000.0,Germany
+104,Jane,45.0,95000.0,Canada
+105,Li,22.0,,China
+105,Li,22.0,,China

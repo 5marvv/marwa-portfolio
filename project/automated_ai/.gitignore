@@ -1,0 +1,26 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Python caching
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# User Uploaded Data & Outputs (Keep folder structure, ignore contents)
+data/uploads/*
+data/processed/*
+outputs/charts/*
+outputs/reports/*
+!data/uploads/.gitkeep
+!data/processed/.gitkeep
+!outputs/charts/.gitkeep
+!outputs/reports/.gitkeep
+
+# IDE configuration files
+.vscode/
+.idea/
+.DS_Store
