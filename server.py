@@ -9,6 +9,18 @@ from flask import Flask, render_template, request, redirect, url_for, send_from_
 app = Flask(__name__, template_folder='.')
 app.url_map.strict_slashes = False
 
+# Absolute path to built frontend static files
+AUTOINSIGHT_DIST = os.path.join(app.root_path, 'project', 'automated_ai', 'frontend', 'dist')
+
+
+# 0. Dedicated Route for AutoInsight Static Frontend (Placed first so it isn't overridden)
+@app.route('/api/autoinsight-frontend/', defaults={'path': ''})
+@app.route('/api/autoinsight-frontend/<path:path>')
+def proxy_autoinsight_frontend(path):
+    if path != "" and os.path.exists(os.path.join(AUTOINSIGHT_DIST, path)):
+        return send_from_directory(AUTOINSIGHT_DIST, path)
+    return send_from_directory(AUTOINSIGHT_DIST, 'index.html')
+
 
 # 1. Route to serve CSS files from root
 @app.route('/<filename>.css')
@@ -233,29 +245,6 @@ def html_page(page_name):
     except Exception:
         return "Page not found.", 404
 
-
-@app.route('/api/autoinsight-frontend/', defaults={'path': ''})
-@app.route('/api/autoinsight-frontend/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def proxy_autoinsight_frontend(path):
-    # Pass along the subpath to Vite's dev server on port 5008
-    target_url = f"http://127.0.0.1:5008/api/autoinsight-frontend/{path}"
-    
-    if request.query_string:
-        target_url += f"?{request.query_string.decode('utf-8')}"
-
-    resp = requests.request(
-        method=request.method,
-        url=target_url,
-        headers={k: v for k, v in request.headers if k.lower() != 'host'},
-        data=request.get_data(),
-        cookies=request.cookies,
-        allow_redirects=False
-    )
-
-    excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-    headers = [(k, v) for k, v in resp.raw.headers.items() if k.lower() not in excluded_headers]
-
-    return Response(resp.content, resp.status_code, headers)
 
 @app.errorhandler(404)
 def page_not_found(e):
