@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 1. Start all sub-services in the background using python / uvicorn directly
+# 1. Start all sub-services in the background
 (cd project/ai_analytics && uvicorn app:app --host 127.0.0.1 --port 5001) &
 (cd project/AIFA && PORT=5002 python aifa.py) &
 (cd project/automated_ai && uvicorn main:app --host 127.0.0.1 --port 5003) &
@@ -8,6 +8,7 @@
 (cd project/movie && PORT=5005 python movie.py) &
 (cd project/queitspace && uvicorn QS:app --host 127.0.0.1 --port 5006) &
 (cd project/stock_dashboard && PORT=5007 python stock.py) &
+(cd project/automated_ai/frontend && npx vite --host 127.0.0.1 --port 5008) &
 
 # Give sub-services time to initialize
 sleep 3
