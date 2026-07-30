@@ -6,13 +6,11 @@
     <title>Python Arcade - Playable Portfolio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <link rel="apple-touch-icon" sizes="180x180" href="../static/apple-icon-180x180.png">
-    <link rel="icon" type="image/x-icon" href="../static/05-moon_98595.ico">
 
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-icon-180x180.png">
+    <link rel="icon" type="image/x-icon" href="/assets/05-moon_98595.ico">
 
     <style>
-    
-        /* Base Resets & Minimalist Typography */
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
         :root {
@@ -43,7 +41,6 @@
             line-height: 1.6;
         }
 
-        /* Navigation */
         .navbar {
             position: sticky;
             top: 0;
@@ -83,7 +80,6 @@
             color: var(--text-primary);
         }
 
-        /* Hero Section */
         .hero {
             max-width: 1100px;
             margin: 0 auto;
@@ -115,7 +111,6 @@
             max-width: 700px;
         }
 
-        /* Tabs System */
         .arcade-section {
             max-width: 1100px;
             margin: 0 auto;
@@ -131,15 +126,24 @@
             margin-bottom: 6rem;
         }
 
+        /* Fixed Tab Bar for Smooth Touch Sliding */
         .arcade-tabs {
             display: flex;
             border-bottom: 1px solid var(--border-color);
             background: #fafafa;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .arcade-tabs::-webkit-scrollbar {
+            display: none;
         }
 
         .tab-btn {
-            flex: 1;
-            padding: 1.25rem;
+            flex: 0 0 auto;
+            padding: 1.25rem 1.5rem;
             border: none;
             background: transparent;
             font-family: 'Space Grotesk', sans-serif;
@@ -165,7 +169,6 @@
             border-bottom: 2px solid var(--accent-dark);
         }
 
-        /* Screen Configurations */
         .game-panel {
             display: none;
             padding: 3rem;
@@ -176,7 +179,6 @@
             display: block;
         }
 
-        /* Minimalist Inputs & Buttons */
         input[type="number"], input[type="text"] {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 1rem;
@@ -228,7 +230,6 @@
             background-color: #fafafa;
         }
 
-        /* Dynamic Feedback Text */
         .console-feed {
             font-family: 'JetBrains Mono', monospace;
             background: var(--console-bg);
@@ -249,7 +250,6 @@
             margin-top: 1.5rem;
         }
 
-        /* Accordion / Dropdown Code Container */
         .code-accordion {
             margin-top: 3rem;
             border-top: 1px solid var(--border-color);
@@ -293,8 +293,6 @@
             border-left: 3px solid var(--accent-dark);
         }
 
-        /* --- GAME SPECIFIC COMPONENT OVERLAYS --- */
-        /* Rock Paper Scissors Choices */
         .rps-choices {
             display: flex;
             gap: 1rem;
@@ -327,7 +325,6 @@
             font-size: 1.5rem;
         }
 
-        /* Tic Tac Toe Grid */
         .ttt-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -355,7 +352,6 @@
             background: #fafafa;
         }
 
-        /* Minimalist Info Sections */
         .about-section {
             background-color: #fafafa;
             border-top: 1px solid var(--border-color);
@@ -401,7 +397,6 @@
             opacity: 0.6;
         }
 
-        /* Footer */
         footer {
             text-align: center;
             padding: 2.5rem 2rem;
@@ -662,7 +657,6 @@ def check_win(b, player):
     </footer>
 
     <script>
-        // Tab system
         function switchGame(gameId, buttonEl) {
             document.querySelectorAll('.game-panel').forEach(panel => {
                 panel.classList.remove('active');
@@ -674,7 +668,6 @@ def check_win(b, player):
             buttonEl.classList.add('active');
         }
 
-        // Accordion toggle animation logic
         function toggleCode(targetId, buttonEl) {
             const container = document.getElementById(targetId);
             const icon = buttonEl.querySelector('i');
@@ -688,9 +681,6 @@ def check_win(b, player):
             }
         }
 
-        // ========================
-        // GAME 1: GUESS THE NUMBER
-        // ========================
         let targetNumber = Math.floor(Math.random() * 100) + 1;
         let guessAttempts = 0;
 
@@ -721,9 +711,6 @@ def check_win(b, player):
             document.getElementById('guess-feed').textContent = "Target reset! Enter a new guess.";
         }
 
-        // ========================
-        // GAME 2: ROCK PAPER SCISSORS
-        // ========================
         let rpsHistory = [];
         const rpsChoices = ['rock', 'paper', 'scissors'];
 
@@ -751,9 +738,6 @@ def check_win(b, player):
             document.getElementById('rps-feed').textContent = "Score and history reset.";
         }
 
-        // ========================
-        // GAME 3: HANGMAN
-        // ========================
         const hangmanWords = ["python", "developer", "aesthetic", "minimal", "logic", "creative"];
         let selectedWord = "";
         let guessedLetters = [];
@@ -811,12 +795,8 @@ def check_win(b, player):
             initHangman();
         }
 
-        // Initialize Hangman word on page load
         initHangman();
 
-        // ========================
-        // GAME 4: TIC-TAC-TOE
-        // ========================
         let tttBoard = Array(9).fill("");
         let tttPlayer = "X";
         let tttActive = true;

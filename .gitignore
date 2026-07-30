@@ -3,3 +3,13 @@ node_modules/
 __pycache__/
 *.pyc
 .env
+
+# Sensitive credentials and secrets
+credentials.json
+*.json
+
+# Local user database / privacy files
+database.csv
+
+# Environments and caches
+venv/
