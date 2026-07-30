@@ -5,7 +5,6 @@ const IS_WINDOWS = process.platform === "win32";
 
 const PY = IS_WINDOWS ? "python" : "python3";
 const UVICORN = "uvicorn";
-const VITE_BIN = "./node_modules/vite/bin/vite.js";
 
 module.exports = {
   apps: [
@@ -17,7 +16,7 @@ module.exports = {
       interpreter: PY,
       autorestart: true,
       max_restarts: 5,
-      env: { PORT: "5000", PYTHONPATH: ROOT }
+      env: { PORT: process.env.PORT || "5000", PYTHONPATH: ROOT }
     },
 
     // --- 2. FASTAPI BACKEND SERVICES ---
@@ -85,17 +84,6 @@ module.exports = {
       autorestart: true,
       max_restarts: 5,
       env: { PORT: "5007", PYTHONPATH: path.join(ROOT, "project", "stock_dashboard") }
-    },
-
-    // --- 4. FRONTEND SERVERS ---
-    {
-      name: "autoinsight-frontend",
-      script: VITE_BIN,
-      args: "--host 0.0.0.0 --port 5008",
-      cwd: path.join(ROOT, "project", "automated_ai", "frontend"),
-      autorestart: true,
-      max_restarts: 5,
-      env: { PORT: "5008", NODE_ENV: "development", VITE_API_BASE: "/api/autoinsight" }
     }
   ]
 };
