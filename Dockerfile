@@ -1,21 +1,22 @@
-FROM python:3.10-slim
+FROM python:3.11-slim
 
-# Install Node.js & PM2
-RUN apt-get update && apt-get install -y curl gnupg && \
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs && \
-    npm install -g pm2
+# Install system dependencies & Node.js for PM2
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \
+    build-essential \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g pm2 \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy repo content
-COPY . .
-
-# Install Python requirements (or virtualenv requirements)
+COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose your main gateway port
+COPY . .
+
 EXPOSE 5000
 
-# Start all services via PM2 in foreground mode
 CMD ["pm2-runtime", "start", "ecosystem.config.js"]
