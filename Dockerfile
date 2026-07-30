@@ -14,13 +14,13 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project files
+# Copy all project files
 COPY . .
 
-# Install Vite frontend dependencies
-RUN cd project/automated_ai/frontend && npm install
+# Install frontend dependencies and build static dist/ folder
+RUN cd project/automated_ai/frontend && npm install && npm run build
 
-# Ensure start.sh has execution permissions
+# Grant execute permissions to start script
 RUN chmod +x start.sh
 
 EXPOSE 5000
