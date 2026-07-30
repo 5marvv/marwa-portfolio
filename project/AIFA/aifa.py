@@ -16,11 +16,18 @@ app = Flask(
     template_folder='templates'
 )
 
-# OpenRouter Client Setup
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=os.getenv("OPENAI_API_KEY")
-)
+# Fetch API key safely from environment
+api_key = os.getenv("OPENAI_API_KEY")
+
+# OpenRouter Client Setup with crash protection
+if api_key:
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key
+    )
+else:
+    client = None
+    logging.warning("OPENAI_API_KEY is missing. AIFA client initialized as None.")
 
 # Allow CORS headers for future domain deployments
 @app.after_request
@@ -39,6 +46,9 @@ def index():
 @app.route("/chat", methods=["POST"], strict_slashes=False)
 @app.route("/api/chat", methods=["POST"], strict_slashes=False)
 def chat():
+    if not client:
+        return jsonify({"error": "OPENAI_API_KEY is not configured on the server."}), 500
+
     data = request.get_json()
 
     if not data:
@@ -80,6 +90,6 @@ def chat():
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
-        port=int(os.environ.get("PORT", 5000)),
+        port=int(os.environ.get("PORT", 5002)),
         debug=False
     )
