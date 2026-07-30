@@ -30,36 +30,33 @@ display:flex;
 flex-direction:column;
 align-items:center;
 justify-content: center;
-height: 100vh;
-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+min-height: 100vh;
+min-height: 100dvh;
 margin:0;
 padding: 20px;
 overflow: hidden;
 }
 
 /* 
-  Hero Container: Centered on landing.
-  Moves elegantly to the top-left corner on submit.
+  Hero Container: 
+  Sits naturally centered on landing, smoothly shifts to top-left on search.
 */
 .hero {
-position: absolute;
-top: 38%;
-left: 50%;
-transform: translate(-50%, -50%);
 display:flex;
 flex-direction:column;
 align-items:center;
 text-align:center;
-transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1);
 z-index: 10;
+margin-bottom: 2.5rem;
 }
 
 .hero img {
-width:160px; 
+width:150px; 
 height:auto;
 object-fit: contain;
 margin-bottom:15px;
-transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 h1 {
@@ -67,32 +64,28 @@ color: var(--accent);
 font-weight: 400;
 letter-spacing: 4px;
 margin: 0;
-font-size: 38px;
-transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+font-size: 36px;
+transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 /* 
-  Chat Container: Starts centered right below the Hero logo.
-  Slides to the bottom when active.
+  Chat Container: 
+  Sits directly below Hero in natural flow on landing, shifts to bottom on search.
 */
 .chat-container {
-position: absolute;
-top: 55%;
-left: 50%;
-transform: translate(-50%, -50%);
 width: 650px;
 max-width: 90%;
 display: flex;
 flex-direction: column;
 align-items: center;
-transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1);
 z-index: 5;
 }
 
 #chat-box {
 display:none;
 width: 100%;
-max-height: 55vh;
+max-height: 60vh;
 overflow-y: auto;
 flex-direction:column;
 gap:10px;
@@ -106,7 +99,7 @@ scrollbar-width: none;
 display: none;
 }
 
-/* Universal message styling */
+/* Message styling */
 .message {
 margin-bottom:25px;
 line-height:1.7;
@@ -138,7 +131,7 @@ margin-bottom:6px;
 input {
 width:100%;
 max-width: 500px;
-padding:16px 20px;
+padding:16px 24px;
 font-size:16px;
 font-family:'Playfair Display',serif;
 background:rgba(20, 20, 20, 0.6);
@@ -157,39 +150,43 @@ box-shadow: 0 0 12px rgba(184, 145, 120, 0.2);
 }
 
 /* 
-  ACTIVE STATE STYLES 
-  Triggered when user sends a message
+  ACTIVE CHAT STATE (After query is submitted)
 */
+body.chat-active {
+justify-content: flex-end;
+}
+
 body.chat-active .hero {
+position: fixed;
 top: 25px;
 left: 30px;
-transform: translate(0, 0);
+margin-bottom: 0;
 flex-direction: row; 
 gap: 15px;
 }
 
 body.chat-active .hero img {
-width: 50px; 
+width: 45px; 
 margin-bottom: 0;
 }
 
 body.chat-active h1 {
-font-size: 22px;
+font-size: 20px;
 letter-spacing: 2px;
 }
 
 body.chat-active .chat-container {
-top: auto;
+position: fixed;
 bottom: 2rem;
-bottom: calc(1.5rem + env(safe-area-inset-bottom)); /* Dynamic spacing for mobile safe areas */
+bottom: calc(1.5rem + env(safe-area-inset-bottom));
 left: 50%;
-transform: translate(-50%, 0);
+transform: translateX(-50%);
 height: calc(100vh - 100px);
 height: calc(100dvh - 100px);
 justify-content: flex-end;
 }
 
-/* Responsive adjustments for mobile screens */
+/* Responsive fixes for small displays */
 @media (max-width: 600px) {
   body.chat-active .hero {
     top: 15px;
@@ -197,18 +194,17 @@ justify-content: flex-end;
   }
   
   body.chat-active .hero img {
-    width: 40px;
+    width: 35px;
   }
   
   body.chat-active h1 {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .message {
     max-width: 95%;
   }
 }
-
 </style>
 </head>
 
@@ -228,10 +224,6 @@ justify-content: flex-end;
 </div>
 
 <script>
-const API_BASE_URL = window.location.origin.includes("localhost") 
-    ? "" 
-    : "";
-
 function typeWriter(element, label, text, containerToScroll) {
     element.innerHTML = `<em>${label}</em><span class="text-content"></span>`;
     const textSpan = element.querySelector('.text-content');
