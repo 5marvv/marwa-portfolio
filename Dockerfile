@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 # Install system dependencies & Node.js for PM2
 RUN apt-get update && apt-get install -y \
@@ -19,4 +19,4 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["pm2-runtime", "start", "ecosystem.config.js"]
+CMD ["npx","pm2-runtime", "start", "ecosystem.config.js"]
