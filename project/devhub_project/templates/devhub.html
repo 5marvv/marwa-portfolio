@@ -61,7 +61,7 @@
 
         async function analyze() {
             const user = document.getElementById('gh-user').value;
-            const res = await fetch(`/api/github/${user}`);
+            const res = await fetch(`/api/devhub/api/github/${user}`);
             const data = await res.json();
             document.getElementById('gh-data').innerHTML = `<p><strong>User:</strong> ${data.name || user}</p><p><strong>Repos:</strong> ${data.public_repos || 0}</p><p><strong>Languages:</strong> ${data.languages?.join(', ') || 'N/A'}</p>`;
         }
@@ -72,7 +72,7 @@
                 code: document.getElementById('s-code').value,
                 tags: document.getElementById('s-tags').value
             };
-            const res = await fetch('/api/snippets', {
+            const res = await fetch('/api/devhub/api/snippets', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload)
@@ -88,7 +88,7 @@
         async function search() {
             const q = document.getElementById('search-box').value;
             if (q.length < 2) return;
-            const res = await fetch(`/api/snippets/search/${q}`);
+            const res = await fetch(`/api/devhub/api/snippets/search/${q}`);
             const data = await res.json();
             const list = document.getElementById('snippet-list');
             list.innerHTML = data.map(s => `<p><strong>${s.title}</strong><br><small>${s.tags}</small></p>`).join('');

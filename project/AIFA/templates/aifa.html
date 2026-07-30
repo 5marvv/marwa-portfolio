@@ -3,7 +3,7 @@
 
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
 <title>AIFA</title>
 
@@ -12,35 +12,38 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-icon-180x180.png">
 <link rel="icon" type="image/x-icon" href="/assets/05-moon_98595.ico">
 
-
 <style>
-
 :root{
 --bg:#000000;
 --text:#d9c8bde6;
 --accent:#b89178e6;
 }
 
-body{
+* {
+box-sizing: border-box;
+}
+
+body {
 background:var(--bg);
 font-family:'Playfair Display',serif;
 display:flex;
 flex-direction:column;
 align-items:center;
-justify-content: flex-end; /* Anchors the interactive layout to the bottom */
-min-height: 100vh;
+justify-content: center;
+height: 100vh;
+height: 100dvh; /* Dynamic viewport height for mobile browsers */
 margin:0;
 padding: 20px;
-box-sizing: border-box;
+overflow: hidden;
 }
 
 /* 
   Hero Container: Centered on landing.
   Moves elegantly to the top-left corner on submit.
 */
-.hero{
+.hero {
 position: absolute;
-top: 40%;
+top: 38%;
 left: 50%;
 transform: translate(-50%, -50%);
 display:flex;
@@ -51,9 +54,8 @@ transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
 z-index: 10;
 }
 
-/* Enlarged landing logo */
-.hero img{
-width:180px; 
+.hero img {
+width:160px; 
 height:auto;
 object-fit: contain;
 margin-bottom:15px;
@@ -69,58 +71,62 @@ font-size: 38px;
 transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* Keeps the chat box and the input comfortably down at the bottom */
+/* 
+  Chat Container: Starts centered right below the Hero logo.
+  Slides to the bottom when active.
+*/
 .chat-container {
+position: absolute;
+top: 55%;
+left: 50%;
+transform: translate(-50%, -50%);
 width: 650px;
-max-width: 100%;
+max-width: 90%;
 display: flex;
 flex-direction: column;
 align-items: center;
-margin-bottom: 30px;
+transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
 z-index: 5;
 }
 
-#chat-box{
+#chat-box {
 display:none;
 width: 100%;
-max-height: 60vh;
+max-height: 55vh;
 overflow-y: auto;
 flex-direction:column;
 gap:10px;
 margin-bottom: 20px;
+padding: 0 10px;
 -webkit-overflow-scrolling: touch;
--ms-overflow-style: none;  /* Hides scrollbar in IE & Edge */
-scrollbar-width: none;  /* Hides scrollbar in Firefox */
+scrollbar-width: none;
 }
 
-/* Hides scrollbar in Chrome, Safari, and Opera */
 #chat-box::-webkit-scrollbar {
 display: none;
 }
 
 /* Universal message styling */
-.message{
+.message {
 margin-bottom:25px;
 line-height:1.7;
-max-width:80%;
+max-width:85%;
 display:flex;
 flex-direction:column;
 color: var(--text);
 }
 
-/* User Message right alignment */
 .user-message {
 align-self: flex-end;
 text-align: right;
 }
 
-/* AIFA Message left alignment */
 .aifa-message {
 align-self: flex-start;
 text-align: left;
 }
 
-em{
+em {
 display:block;
 font-size:12px;
 letter-spacing:2px;
@@ -129,31 +135,33 @@ color:var(--accent);
 margin-bottom:6px;
 }
 
-input{
+input {
 width:100%;
-max-width: 450px;
-padding:14px;
+max-width: 500px;
+padding:16px 20px;
 font-size:16px;
 font-family:'Playfair Display',serif;
-background:transparent;
-border:1px solid #ccc;
-border-radius:5px;
+background:rgba(20, 20, 20, 0.6);
+border:1px solid #333;
+border-radius:30px;
 text-align:center;
 outline:none;
 color: var(--text);
+backdrop-filter: blur(8px);
 transition: all 0.3s ease;
 }
 
 input:focus {
 border-color: var(--accent);
+box-shadow: 0 0 12px rgba(184, 145, 120, 0.2);
 }
 
 /* 
   ACTIVE STATE STYLES 
-  Triggered when user initiates conversation
+  Triggered when user sends a message
 */
 body.chat-active .hero {
-top: 30px;
+top: 25px;
 left: 30px;
 transform: translate(0, 0);
 flex-direction: row; 
@@ -161,17 +169,47 @@ gap: 15px;
 }
 
 body.chat-active .hero img {
-width: 70px; 
+width: 50px; 
 margin-bottom: 0;
 }
 
 body.chat-active h1 {
-font-size: 24px;
+font-size: 22px;
 letter-spacing: 2px;
 }
 
-</style>
+body.chat-active .chat-container {
+top: auto;
+bottom: 2rem;
+bottom: calc(1.5rem + env(safe-area-inset-bottom)); /* Dynamic spacing for mobile safe areas */
+left: 50%;
+transform: translate(-50%, 0);
+height: calc(100vh - 100px);
+height: calc(100dvh - 100px);
+justify-content: flex-end;
+}
 
+/* Responsive adjustments for mobile screens */
+@media (max-width: 600px) {
+  body.chat-active .hero {
+    top: 15px;
+    left: 15px;
+  }
+  
+  body.chat-active .hero img {
+    width: 40px;
+  }
+  
+  body.chat-active h1 {
+    font-size: 18px;
+  }
+
+  .message {
+    max-width: 95%;
+  }
+}
+
+</style>
 </head>
 
 <body>
@@ -190,11 +228,9 @@ letter-spacing: 2px;
 </div>
 
 <script>
-// Base API URL configuration
-// Leave as empty string "" for same-domain deployment, or set your endpoint domain
 const API_BASE_URL = window.location.origin.includes("localhost") 
     ? "" 
-    : ""; // e.g., "https://api.yourdomain.com"
+    : "";
 
 function typeWriter(element, label, text, containerToScroll) {
     element.innerHTML = `<em>${label}</em><span class="text-content"></span>`;
@@ -229,7 +265,7 @@ async function send() {
     document.body.classList.add('chat-active');
     chat.style.display = "flex";
 
-    // Create user message safely to avoid XSS
+    // Create user message
     const userDiv = document.createElement("div");
     userDiv.className = "message user-message";
     userDiv.innerHTML = `<em>You</em><span class="text-content"></span>`;
@@ -245,7 +281,6 @@ async function send() {
     chat.appendChild(aifaDiv);
 
     try {
-        // Target the portfolio proxy route explicitly
         const res = await fetch("/api/aifa/chat", {
             method: "POST",
             headers: {
@@ -271,5 +306,4 @@ async function send() {
 </script>
 
 </body>
-
 </html>
