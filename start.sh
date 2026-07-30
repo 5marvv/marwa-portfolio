@@ -1,6 +1,10 @@
 #!/bin/bash
 
-# 1. Start sub-services in the background
+# 1. Build the AutoInsight React frontend
+echo "Building AutoInsight Frontend..."
+(cd project/automated_ai/frontend && npm install && npm run build)
+
+# 2. Start sub-services in the background
 (cd project/ai_analytics && uvicorn app:app --host 127.0.0.1 --port 5001) &
 (cd project/AIFA && PORT=5002 python aifa.py) &
 (cd project/automated_ai && uvicorn main:app --host 127.0.0.1 --port 5003) &
@@ -12,5 +16,5 @@
 # Give sub-services time to initialize
 sleep 3
 
-# 2. Launch main Gateway on host PORT (Foreground process)
+# 3. Launch main Gateway on host PORT (Foreground process)
 python server.py
